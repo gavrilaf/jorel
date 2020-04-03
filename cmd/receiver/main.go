@@ -32,6 +32,9 @@ func main() {
 
 		dlog.FromContext(ctx).Infof("Received message: %v", msg)
 
+		checked, diff := msg.Check()
+		dlog.FromContext(ctx).Infof("Message ID: %s, checked=%v, difference=%v", msg.ID, checked, diff)
+
 		return nil
 	})
 

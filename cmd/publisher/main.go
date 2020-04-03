@@ -2,6 +2,10 @@ package main
 
 import (
 	"context"
+	"fmt"
+	"time"
+
+	"github.com/google/uuid"
 
 	"github.com/gavrilaf/dyson/pkg/dlog"
 	"github.com/gavrilaf/dyson/pkg/msgqueue"
@@ -19,21 +23,33 @@ func main() {
 
 	defer publisher.Close()
 
-	m := testdata.Message{
-		ID:   1,
-		Text: "test",
+	publisherID := uuid.New().String()
+
+	durations := []time.Duration{
+		5 * time.Second,
+		10 * time.Second,
+		time.Minute,
 	}
 
-	res, err := publisher.Publish(ctx, m, map[string]string{})
-	if err != nil {
-		logger.Panicf("failed to publish message, %v", err)
-	}
+	for indx, d := range durations {
+		id := fmt.Sprintf("%s-%d", publisherID, indx)
+		m := testdata.Message{
+			ID:               id,
+			Created:          time.Now(),
+			ScheduleDuration: d,
+		}
 
-	messageID, err := res.GetMessageID(ctx)
-	if err != nil {
-		logger.Panicf("failed to read message ID, %v", err)
-	}
+		res, err := publisher.Publish(ctx, m, map[string]string{})
+		if err != nil {
+			logger.Panicf("failed to publish message, %v", err)
+		}
 
-	logger.Infof("Published message with ID: %s", messageID)
+		messageID, err := res.GetMessageID(ctx)
+		if err != nil {
+			logger.Panicf("failed to read message ID, %v", err)
+		}
+
+		logger.Infof("Published message with ID: %s", messageID)
+	}
 
 }
