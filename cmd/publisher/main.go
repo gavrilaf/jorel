@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -39,7 +40,12 @@ func main() {
 			ScheduleDuration: d,
 		}
 
-		res, err := publisher.Publish(ctx, m, map[string]string{})
+		data, err := json.Marshal(&m)
+		if err != nil {
+			logger.Panicf("failed to marshal message, %v", err)
+		}
+
+		res, err := publisher.Publish(ctx, data, map[string]string{})
 		if err != nil {
 			logger.Panicf("failed to publish message, %v", err)
 		}

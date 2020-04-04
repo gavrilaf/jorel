@@ -2,8 +2,6 @@ package msgqueue
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
 	"io"
 
 	"cloud.google.com/go/pubsub"
@@ -23,7 +21,7 @@ func (p *PublishResult) GetMessageID(ctx context.Context) (string, error) {
 
 type Publisher interface {
 	io.Closer
-	Publish(ctx context.Context, msg interface{}, attributes map[string]string) (*PublishResult, error)
+	Publish(ctx context.Context, data []byte, attributes map[string]string) (*PublishResult, error)
 }
 
 func NewPublisher(ctx context.Context, projectID string, topicID string) (Publisher, error) {
@@ -54,12 +52,7 @@ func (c *publisherImpl) Close() error {
 	return nil
 }
 
-func (c *publisherImpl) Publish(ctx context.Context, msg interface{}, attributes map[string]string) (*PublishResult, error) {
-	data, err := json.Marshal(msg)
-	if err != nil {
-		return nil, fmt.Errorf("json marshal error: %w", err)
-	}
-
-	pubsubMsg := &pubsub.Message{Data: data, Attributes: attributes}
-	return &PublishResult{result: c.topic.Publish(ctx, pubsubMsg)}, nil
+func (c *publisherImpl) Publish(ctx context.Context, data []byte, attributes map[string]string) (*PublishResult, error) {
+	msg := &pubsub.Message{Data: data, Attributes: attributes}
+	return &PublishResult{result: c.topic.Publish(ctx, msg)}, nil
 }

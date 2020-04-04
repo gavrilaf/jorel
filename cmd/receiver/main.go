@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"os"
 	"os/signal"
-	"runtime"
 	"syscall"
+	"time"
 
 	"github.com/gavrilaf/dyson/pkg/dlog"
 	"github.com/gavrilaf/dyson/pkg/msgqueue"
@@ -51,6 +51,6 @@ func main() {
 	}()
 
 	for {
-		runtime.Gosched()
+		time.Sleep(time.Second)
 	}
 }

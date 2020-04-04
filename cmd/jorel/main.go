@@ -4,10 +4,11 @@ import (
 	"context"
 	"os"
 	"os/signal"
-	"runtime"
 	"syscall"
+	"time"
 
 	"github.com/gavrilaf/dyson/pkg/dlog"
+	"github.com/gavrilaf/dyson/pkg/jorel"
 	"github.com/gavrilaf/dyson/pkg/msgqueue"
 	"github.com/gavrilaf/dyson/pkg/testdata"
 )
@@ -28,6 +29,17 @@ func main() {
 
 	logger.Info("Starting jor-el")
 
+	config := jorel.HandlerConfig{
+		Receiver:  receiver,
+		Publisher: publisher,
+	}
+
+	handler := jorel.NewHandler(config)
+	err = handler.Run(ctx)
+	if err != nil {
+		logger.Panicf("failed to run handler, %v", err)
+	}
+
 	c := make(chan os.Signal, 2)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	go func() {
@@ -44,6 +56,6 @@ func main() {
 	}()
 
 	for {
-		runtime.Gosched()
+		time.Sleep(time.Second)
 	}
 }
