@@ -9,3 +9,7 @@ run-publisher:
 run-receiver:
 	go build -o receiver cmd/receiver/main.go
 	./receiver
+
+run-capacitor:
+	go build -o capacitor cmd/capacitor/main.go
+	./capacitor

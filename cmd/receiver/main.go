@@ -19,7 +19,7 @@ func main() {
 
 	receiver, err := msgqueue.NewReceiver(ctx, testdata.ProjectID, testdata.CheckSubscription)
 	if err != nil {
-		logger.Panicf("failed to create publisher, %v", err)
+		logger.Panicf("failed to create receiver, %v", err)
 	}
 
 	logger.Info("Starting receiver")
