@@ -2,7 +2,9 @@ package testdata
 
 const (
 	ProjectID = "dyson-272914"
-	TopicName = "updates-topic"
-	CheckSubscription = "check-subs"
-	SchedulerSubscription = ""
+
+	IngressTopic = "jor-el-ingress-topic"
+	EgressTopic = "jor-el-ingress-topic"
+	IngressSubs = "jor-el-ingress-sub"
+	EgressSubs = "jor-el-egress-sub"
 )

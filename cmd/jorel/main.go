@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"os"
 	"os/signal"
 	"runtime"
@@ -17,26 +16,17 @@ func main() {
 	ctx := context.Background()
 	logger := dlog.FromContext(ctx)
 
-	receiver, err := msgqueue.NewReceiver(ctx, testdata.ProjectID, testdata.EgressSubs)
+	receiver, err := msgqueue.NewReceiver(ctx, testdata.ProjectID, testdata.IngressSubs)
 	if err != nil {
 		logger.Panicf("failed to create receiver, %v", err)
 	}
 
-	logger.Info("Starting receiver")
-	err = receiver.Run(ctx, func(ctx context.Context, data []byte, attributes map[string]string) error {
-		var msg testdata.Message
-		err := json.Unmarshal(data, &msg)
-		if err != nil {
-			return err
-		}
+	publisher, err := msgqueue.NewPublisher(ctx, testdata.ProjectID, testdata.EgressTopic)
+	if err != nil {
+		logger.Panicf("failed to create publisher, %v", err)
+	}
 
-		dlog.FromContext(ctx).Infof("Received message: %v", msg)
-
-		checked, diff := msg.Check()
-		dlog.FromContext(ctx).Infof("Message ID: %s, checked=%v, difference=%v", msg.ID, checked, diff)
-
-		return nil
-	})
+	logger.Info("Starting jor-el")
 
 	c := make(chan os.Signal, 2)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
@@ -46,6 +36,9 @@ func main() {
 
 		err := receiver.Close()
 		logger.Infof("receiver closed, error=%v", err)
+
+		err = publisher.Close()
+		logger.Infof("publisher closed, error=%v", err)
 
 		os.Exit(0)
 	}()

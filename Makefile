@@ -10,6 +10,6 @@ run-receiver:
 	go build -o receiver cmd/receiver/main.go
 	./receiver
 
-run-capacitor:
-	go build -o capacitor cmd/capacitor/main.go
-	./capacitor
+run-jorel:
+	go build -o jorel cmd/jorel/main.go
+	./jorel

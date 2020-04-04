@@ -16,7 +16,7 @@ func main() {
 	ctx := context.Background()
 	logger := dlog.FromContext(ctx)
 
-	publisher, err := msgqueue.NewPublisher(ctx, testdata.ProjectID, testdata.TopicName)
+	publisher, err := msgqueue.NewPublisher(ctx, testdata.ProjectID, testdata.IngressTopic)
 	if err != nil {
 		logger.Panicf("failed to create publisher, %v", err)
 	}
