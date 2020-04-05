@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/gavrilaf/dyson/pkg/dlog"
-	"github.com/gavrilaf/dyson/pkg/jorel"
+	"github.com/gavrilaf/dyson/pkg/scheduler"
 	"github.com/gavrilaf/dyson/pkg/msgqueue"
 	"github.com/gavrilaf/dyson/pkg/testdata"
 )
@@ -29,12 +29,12 @@ func main() {
 
 	logger.Info("Starting jor-el")
 
-	config := jorel.HandlerConfig{
+	config := scheduler.HandlerConfig{
 		Receiver:  receiver,
 		Publisher: publisher,
 	}
 
-	handler := jorel.NewHandler(config)
+	handler := scheduler.NewHandler(config)
 	err = handler.Run(ctx)
 	if err != nil {
 		logger.Panicf("failed to run handler, %v", err)
