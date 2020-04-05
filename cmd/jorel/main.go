@@ -30,14 +30,14 @@ func main() {
 	logger.Info("Starting jor-el")
 
 	config := scheduler.HandlerConfig{
-		Receiver:  receiver,
 		Publisher: publisher,
 	}
 
 	handler := scheduler.NewHandler(config)
-	err = handler.Run(ctx)
+
+	err = receiver.Run(ctx, handler)
 	if err != nil {
-		logger.Panicf("failed to run handler, %v", err)
+		logger.Panicf("failed to run receiver, %v", err)
 	}
 
 	c := make(chan os.Signal, 2)

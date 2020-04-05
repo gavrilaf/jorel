@@ -9,11 +9,13 @@ import (
 	"github.com/gavrilaf/dyson/pkg/dlog"
 )
 
-type HandlerFunc func(ctx context.Context, data []byte, attributes map[string]string) error
+type Handler interface {
+	Receive(ctx context.Context, data []byte, attributes map[string]string) error
+}
 
 type Receiver interface {
 	io.Closer
-	Run(ctx context.Context, handler HandlerFunc) error
+	Run(ctx context.Context, handler Handler) error
 }
 
 func NewReceiver(ctx context.Context, projectID string, subscriptionID string) (Receiver, error) {
@@ -30,7 +32,6 @@ func NewReceiver(ctx context.Context, projectID string, subscriptionID string) (
 	}, nil
 }
 
-
 // receiverImpl
 
 type receiverImpl struct {
@@ -38,7 +39,7 @@ type receiverImpl struct {
 	sub    *pubsub.Subscription
 }
 
-func (p* receiverImpl) Run(ctx context.Context, handler HandlerFunc) error {
+func (p* receiverImpl) Run(ctx context.Context, handler Handler) error {
 	go func() {
 		err := p.sub.Receive(ctx, func(ctx context.Context, msg *pubsub.Message) {
 			defer msg.Ack()
@@ -47,7 +48,7 @@ func (p* receiverImpl) Run(ctx context.Context, handler HandlerFunc) error {
 			log.Info("received message")
 
 			ctxWithLog := dlog.WithLogger(ctx, log)
-			err := handler(ctxWithLog, msg.Data, msg.Attributes)
+			err := handler.Receive(ctxWithLog, msg.Data, msg.Attributes)
 
 			if err != nil {
 				log.WithError(err).Error("failed to handle message")
