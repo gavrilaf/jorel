@@ -45,7 +45,10 @@ func main() {
 			logger.Panicf("failed to marshal message, %v", err)
 		}
 
-		res, err := publisher.Publish(ctx, data, map[string]string{})
+		attributes := msgqueue.MsgAttributes{
+			DelayInSeconds: d,
+		}
+		res, err := publisher.Publish(ctx, data, attributes)
 		if err != nil {
 			logger.Panicf("failed to publish message, %v", err)
 		}

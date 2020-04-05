@@ -21,7 +21,7 @@ func (p *PublishResult) GetMessageID(ctx context.Context) (string, error) {
 
 type Publisher interface {
 	io.Closer
-	Publish(ctx context.Context, data []byte, attributes map[string]string) (*PublishResult, error)
+	Publish(ctx context.Context, data []byte, attributes MsgAttributes) (*PublishResult, error)
 }
 
 func NewPublisher(ctx context.Context, projectID string, topicID string) (Publisher, error) {
@@ -52,7 +52,7 @@ func (c *publisherImpl) Close() error {
 	return nil
 }
 
-func (c *publisherImpl) Publish(ctx context.Context, data []byte, attributes map[string]string) (*PublishResult, error) {
-	msg := &pubsub.Message{Data: data, Attributes: attributes}
+func (c *publisherImpl) Publish(ctx context.Context, data []byte, attributes MsgAttributes) (*PublishResult, error) {
+	msg := &pubsub.Message{Data: data, Attributes: attributes.GetAttributes()}
 	return &PublishResult{result: c.topic.Publish(ctx, msg)}, nil
 }
