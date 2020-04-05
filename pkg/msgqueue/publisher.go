@@ -9,19 +9,25 @@ import (
 
 // PublishResult
 
-type PublishResult struct {
+//go:generate mockery -name PublishResult -outpkg msgqueuemocks -output ./msgqueuemocks -dir .
+type PublishResult interface {
+	GetMessageID(ctx context.Context) (string, error)
+}
+
+type publishResult struct {
 	result *pubsub.PublishResult
 }
 
-func (p *PublishResult) GetMessageID(ctx context.Context) (string, error) {
+func (p *publishResult) GetMessageID(ctx context.Context) (string, error) {
 	return p.result.Get(ctx)
 }
 
 // Publisher
 
+//go:generate mockery -name Publisher -outpkg msgqueuemocks -output ./msgqueuemocks -dir .
 type Publisher interface {
 	io.Closer
-	Publish(ctx context.Context, data []byte, attributes MsgAttributes) (*PublishResult, error)
+	Publish(ctx context.Context, data []byte, attributes map[string]string) (PublishResult, error)
 }
 
 func NewPublisher(ctx context.Context, projectID string, topicID string) (Publisher, error) {
@@ -52,7 +58,7 @@ func (c *publisherImpl) Close() error {
 	return nil
 }
 
-func (c *publisherImpl) Publish(ctx context.Context, data []byte, attributes MsgAttributes) (*PublishResult, error) {
-	msg := &pubsub.Message{Data: data, Attributes: attributes.GetAttributes()}
-	return &PublishResult{result: c.topic.Publish(ctx, msg)}, nil
+func (c *publisherImpl) Publish(ctx context.Context, data []byte, attributes map[string]string) (PublishResult, error) {
+	msg := &pubsub.Message{Data: data, Attributes: attributes}
+	return &publishResult{result: c.topic.Publish(ctx, msg)}, nil
 }

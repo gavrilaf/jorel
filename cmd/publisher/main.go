@@ -27,6 +27,7 @@ func main() {
 	publisherID := uuid.New().String()
 
 	durations := []time.Duration{
+		0,
 		5 * time.Second,
 		10 * time.Second,
 		time.Minute,
@@ -47,8 +48,10 @@ func main() {
 
 		attributes := msgqueue.MsgAttributes{
 			DelayInSeconds: d,
+			Original:       map[string]string{"one": "two"},
 		}
-		res, err := publisher.Publish(ctx, data, attributes)
+
+		res, err := publisher.Publish(ctx, data, attributes.GetAttributes())
 		if err != nil {
 			logger.Panicf("failed to publish message, %v", err)
 		}

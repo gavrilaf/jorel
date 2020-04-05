@@ -28,7 +28,7 @@ func TestMsgAttributes(t *testing.T) {
 			name: "with other attributes",
 			msgAttrs: msgqueue.MsgAttributes{
 				DelayInSeconds: 86400*time.Second,
-				Other: map[string]string{"one": "two", "three": "four"},
+				Original:       map[string]string{"one": "two", "three": "four"},
 			},
 		},
 	}

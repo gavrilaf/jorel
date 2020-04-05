@@ -31,6 +31,7 @@ func main() {
 
 	config := scheduler.HandlerConfig{
 		Publisher: publisher,
+		TimeSource: scheduler.SystemTime{},
 	}
 
 	handler := scheduler.NewHandler(config)

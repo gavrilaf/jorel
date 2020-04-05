@@ -12,13 +12,13 @@ const (
 
 type MsgAttributes struct {
 	DelayInSeconds time.Duration
-	Other          map[string]string
+	Original       map[string]string
 }
 
 func (ma MsgAttributes) GetAttributes() map[string]string {
 	attributes := make(map[string]string)
 
-	for k, v := range ma.Other {
+	for k, v := range ma.Original {
 		attributes[k] = v
 	}
 
@@ -55,6 +55,6 @@ func NewMsgAttributes(attributes map[string]string) (MsgAttributes, error) {
 
 	return MsgAttributes{
 		DelayInSeconds: time.Duration(delay),
-		Other:          other,
+		Original:       other,
 	}, nil
 }
