@@ -22,3 +22,4 @@ cloud_sql_proxy
 # service key
 service-key.json
 
+url.txt

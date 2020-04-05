@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"github.com/gavrilaf/dyson/pkg/scheduler/storage/postgre"
+	"github.com/gavrilaf/dyson/pkg/scheduler/storage/postgres"
 	"os"
 	"os/signal"
 	"syscall"
@@ -29,7 +29,7 @@ func main() {
 	}
 
 	dbUrl := os.Getenv("JOR_EL_POSTGRE_URL")
-	storage, err := postgre.NewStorage(ctx, dbUrl)
+	storage, err := postgres.NewStorage(ctx, dbUrl)
 	if err != nil {
 		logger.Panicf("failed to connect database, %v", err)
 	}
