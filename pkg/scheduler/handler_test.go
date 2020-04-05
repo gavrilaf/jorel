@@ -2,9 +2,13 @@ package scheduler_test
 
 import (
 	"context"
-	"github.com/gavrilaf/dyson/pkg/scheduler/schedulermocks"
-	"github.com/stretchr/testify/mock"
+	"fmt"
 	"testing"
+	"time"
+
+	"github.com/gavrilaf/dyson/pkg/scheduler/schedulermocks"
+	"github.com/gavrilaf/dyson/pkg/scheduler/storage"
+	"github.com/stretchr/testify/mock"
 
 	"github.com/stretchr/testify/assert"
 
@@ -16,6 +20,8 @@ import (
 func TestHandlerReceive(t *testing.T) {
 	ctx := context.Background()
 	data := []byte("data")
+
+	now := time.Now()
 
 	publishResult := &msgqueuemocks.PublishResult{}
 	publishResult.On("GetMessageID", mock.Anything).Return("1", nil)
@@ -49,23 +55,79 @@ func TestHandlerReceive(t *testing.T) {
 
 		m.publisher.AssertCalled(t, "Publish", mock.Anything, data, map[string]string{"one": "two"})
 	})
+
+	t.Run("when publisher fails", func(t *testing.T) {
+		subject, m := subjectWithMocks()
+
+		m.publisher.On("Publish", mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf(""))
+
+		err := subject.Receive(ctx, data, map[string]string{"jor-el-delay": "0", "one": "two"})
+		assert.Error(t, err)
+	})
+
+	t.Run("save with empty attributes", func(t *testing.T) {
+		subject, m := subjectWithMocks()
+
+		m.timeSource.On("Now").Return(now)
+		m.storage.On("Save", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+
+		err := subject.Receive(ctx, data, map[string]string{"jor-el-delay": "5"})
+		assert.NoError(t, err)
+
+		expectedTime := now.Add(5 * time.Second)
+		expectedMessage := storage.Message{
+			Data: data,
+		}
+
+		m.storage.AssertCalled(t, "Save", mock.Anything, expectedTime, expectedMessage)
+	})
+
+	t.Run("save with attributes", func(t *testing.T) {
+		subject, m := subjectWithMocks()
+
+		m.timeSource.On("Now").Return(now)
+		m.storage.On("Save", mock.Anything, mock.Anything, mock.Anything).Return(nil)
+
+		err := subject.Receive(ctx, data, map[string]string{"jor-el-delay": "20", "one": "two"})
+		assert.NoError(t, err)
+
+		expectedTime := now.Add(20 * time.Second)
+		expectedMessage := storage.Message{
+			Data:       data,
+			Attributes: map[string]string{"one": "two"},
+		}
+
+		m.storage.AssertCalled(t, "Save", mock.Anything, expectedTime, expectedMessage)
+	})
+
+	t.Run("when storage fails", func(t *testing.T) {
+		subject, m := subjectWithMocks()
+
+		m.timeSource.On("Now").Return(now)
+		m.storage.On("Save", mock.Anything, mock.Anything, mock.Anything).Return(fmt.Errorf(""))
+
+		err := subject.Receive(ctx, data, map[string]string{"jor-el-delay": "5"})
+		assert.Error(t, err)
+	})
 }
 
 type mocks struct {
-	publisher *msgqueuemocks.Publisher
-	storage   *storagemocks.SchedulerStorage
+	publisher  *msgqueuemocks.Publisher
+	storage    *storagemocks.SchedulerStorage
 	timeSource *schedulermocks.TimeSource
 }
 
 func subjectWithMocks() (*scheduler.Handler, mocks) {
 	m := mocks{
-		publisher: &msgqueuemocks.Publisher{},
-		storage:   &storagemocks.SchedulerStorage{},
+		publisher:  &msgqueuemocks.Publisher{},
+		storage:    &storagemocks.SchedulerStorage{},
 		timeSource: &schedulermocks.TimeSource{},
 	}
 
 	subject := scheduler.NewHandler(scheduler.HandlerConfig{
-		Publisher: m.publisher,
+		Publisher:  m.publisher,
+		Storage:    m.storage,
+		TimeSource: m.timeSource,
 	})
 
 	return subject, m

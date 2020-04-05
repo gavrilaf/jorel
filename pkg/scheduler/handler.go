@@ -3,6 +3,7 @@ package scheduler
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/gavrilaf/dyson/pkg/dlog"
 	"github.com/gavrilaf/dyson/pkg/msgqueue"
@@ -10,21 +11,21 @@ import (
 )
 
 type HandlerConfig struct {
-	Publisher msgqueue.Publisher
-	Storage storage.SchedulerStorage
+	Publisher  msgqueue.Publisher
+	Storage    storage.SchedulerStorage
 	TimeSource TimeSource
 }
 
 type Handler struct {
-	publisher msgqueue.Publisher
-	storage storage.SchedulerStorage
+	publisher  msgqueue.Publisher
+	storage    storage.SchedulerStorage
 	timeSource TimeSource
 }
 
 func NewHandler(config HandlerConfig) *Handler {
 	return &Handler{
-		publisher: config.Publisher,
-		storage: config.Storage,
+		publisher:  config.Publisher,
+		storage:    config.Storage,
 		timeSource: config.TimeSource,
 	}
 }
@@ -35,7 +36,11 @@ func (h *Handler) Receive(ctx context.Context, data []byte, attributes map[strin
 		return fmt.Errorf("failed to parse attributes, %w", err)
 	}
 
-	return h.publish(ctx, data, msgAttributes.Original)
+	if msgAttributes.DelayInSeconds == 0 {
+		return h.publish(ctx, data, msgAttributes.Original)
+	} else {
+		return h.save(ctx, data, msgAttributes)
+	}
 }
 
 func (h *Handler) publish(ctx context.Context, data []byte, attributes map[string]string) error {
@@ -52,4 +57,15 @@ func (h *Handler) publish(ctx context.Context, data []byte, attributes map[strin
 	dlog.FromContext(ctx).Infof("Resend message with id: %s", msgID)
 
 	return nil
+}
+
+func (h *Handler) save(ctx context.Context, data []byte, msgAttributes msgqueue.MsgAttributes) error {
+	scheduledTime := h.timeSource.Now().Add(msgAttributes.DelayInSeconds * time.Second)
+
+	message := storage.Message{
+		Data:       data,
+		Attributes: msgAttributes.Original,
+	}
+
+	return h.storage.Save(ctx, scheduledTime, message)
 }

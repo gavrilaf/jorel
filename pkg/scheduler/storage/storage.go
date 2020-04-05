@@ -1,6 +1,9 @@
 package storage
 
-import "time"
+import (
+	"context"
+	"time"
+)
 
 type Message struct {
 	Data []byte
@@ -14,6 +17,6 @@ type ScheduledMessage struct {
 
 //go:generate mockery -name SchedulerStorage -outpkg storagemocks -output ./storagemocks -dir .
 type SchedulerStorage interface {
-	Save(scheduledTime time.Time, msg Message) error
-	GetMessages(olderThan time.Time, limit int) ([]ScheduledMessage, error)
+	Save(ctx context.Context, scheduledTime time.Time, msg Message) error
+	GetMessages(ctx context.Context, olderThan time.Time, limit int) ([]ScheduledMessage, error)
 }

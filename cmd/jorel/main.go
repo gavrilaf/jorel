@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"github.com/gavrilaf/dyson/pkg/scheduler/storage/postgre"
 	"os"
 	"os/signal"
 	"syscall"
@@ -29,8 +30,11 @@ func main() {
 
 	logger.Info("Starting jor-el")
 
+	storage := &postgre.Storage{}
+
 	config := scheduler.HandlerConfig{
 		Publisher: publisher,
+		Storage: storage,
 		TimeSource: scheduler.SystemTime{},
 	}
 
