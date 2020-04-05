@@ -16,6 +16,20 @@ type SchedulerStorage struct {
 	mock.Mock
 }
 
+// Close provides a mock function with given fields:
+func (_m *SchedulerStorage) Close() error {
+	ret := _m.Called()
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func() error); ok {
+		r0 = rf()
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // GetMessages provides a mock function with given fields: ctx, olderThan, limit
 func (_m *SchedulerStorage) GetMessages(ctx context.Context, olderThan time.Time, limit int) ([]storage.ScheduledMessage, error) {
 	ret := _m.Called(ctx, olderThan, limit)

@@ -28,9 +28,13 @@ func main() {
 		logger.Panicf("failed to create publisher, %v", err)
 	}
 
-	logger.Info("Starting jor-el")
+	dbUrl := os.Getenv("JOR_EL_POSTGRE_URL")
+	storage, err := postgre.NewStorage(ctx, dbUrl)
+	if err != nil {
+		logger.Panicf("failed to connect database, %v", err)
+	}
 
-	storage := &postgre.Storage{}
+	logger.Info("Starting jor-el")
 
 	config := scheduler.HandlerConfig{
 		Publisher: publisher,
@@ -56,6 +60,9 @@ func main() {
 
 		err = publisher.Close()
 		logger.Infof("publisher closed, error=%v", err)
+
+		err = storage.Close()
+		logger.Infof("storage closed, error=%v", err)
 
 		os.Exit(0)
 	}()
