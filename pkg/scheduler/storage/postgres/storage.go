@@ -49,8 +49,66 @@ func (s *storage) Save(ctx context.Context, scheduledTime time.Time, msg base.Me
 	return err
 }
 
-func (s *storage) GetMessages(ctx context.Context, olderThan time.Time, limit int) ([]base.ScheduledMessage, error) {
-	return nil, nil
+func (s *storage) GetLatest(ctx context.Context, olderThan time.Time, handler base.Handler) (bool, error) {
+	tx, err := s.db.Begin(ctx)
+	if err != nil {
+		return false, fmt.Errorf("failed to start transaction, %w", err)
+	}
+
+	sql := "UPDATE messages SET done = 't' WHERE id = (SELECT id " +
+				"FROM messages WHERE done = 'f' AND scheduledtime <= $1 " +
+				"ORDER BY scheduledtime FOR UPDATE SKIP LOCKED LIMIT 1) RETURNING scheduledtime, data, attributes;"
+
+	rows, err := tx.Query(ctx, sql, olderThan)
+	if err != nil {
+		tx.Rollback(ctx)
+		return false, fmt.Errorf("failed to query scheduled items, %w", err)
+	}
+
+	handled := false
+	if rows.Next() {
+		var scheduledTime time.Time
+		var data []byte
+		var attrs []byte
+
+		err = rows.Scan(&scheduledTime, &data, &attrs)
+		if err != nil {
+			tx.Rollback(ctx)
+			return false, fmt.Errorf("failed to query scheduled items, %w", err)
+		}
+
+		var parsedAttrs map[string]string
+		err = json.Unmarshal(attrs, &parsedAttrs)
+		if err != nil {
+			tx.Rollback(ctx)
+			return false, fmt.Errorf("failed to unmarshal attributes, %w", err)
+		}
+
+		msg := base.ScheduledMessage{
+			Message:       base.Message{
+				Data:       data,
+				Attributes: parsedAttrs,
+			},
+			ScheduledTime: scheduledTime.UTC(),
+		}
+
+		err := handler.Handle(ctx, msg)
+		if err != nil {
+			tx.Rollback(ctx)
+			return false, fmt.Errorf("failed to handler message, %w", err)
+		}
+
+		handled = true
+	}
+
+	rows.Close()
+
+	err = tx.Commit(ctx)
+	if err != nil {
+		return false, fmt.Errorf("failed to commit transaction, %w", err)
+	}
+
+	return handled, nil
 }
 
 func (s *storage) Close() error {

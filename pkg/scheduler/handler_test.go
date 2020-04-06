@@ -6,14 +6,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gavrilaf/dyson/pkg/scheduler/schedulermocks"
-	"github.com/gavrilaf/dyson/pkg/scheduler/storage"
-	"github.com/stretchr/testify/mock"
-
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 
 	"github.com/gavrilaf/dyson/pkg/msgqueue/msgqueuemocks"
 	"github.com/gavrilaf/dyson/pkg/scheduler"
+	"github.com/gavrilaf/dyson/pkg/scheduler/schedulermocks"
+	"github.com/gavrilaf/dyson/pkg/scheduler/storage"
 	"github.com/gavrilaf/dyson/pkg/scheduler/storage/storagemocks"
 )
 

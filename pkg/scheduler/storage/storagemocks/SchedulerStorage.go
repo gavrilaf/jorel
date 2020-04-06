@@ -30,22 +30,20 @@ func (_m *SchedulerStorage) Close() error {
 	return r0
 }
 
-// GetMessages provides a mock function with given fields: ctx, olderThan, limit
-func (_m *SchedulerStorage) GetMessages(ctx context.Context, olderThan time.Time, limit int) ([]storage.ScheduledMessage, error) {
-	ret := _m.Called(ctx, olderThan, limit)
+// GetLatest provides a mock function with given fields: ctx, olderThan, handler
+func (_m *SchedulerStorage) GetLatest(ctx context.Context, olderThan time.Time, handler storage.Handler) (bool, error) {
+	ret := _m.Called(ctx, olderThan, handler)
 
-	var r0 []storage.ScheduledMessage
-	if rf, ok := ret.Get(0).(func(context.Context, time.Time, int) []storage.ScheduledMessage); ok {
-		r0 = rf(ctx, olderThan, limit)
+	var r0 bool
+	if rf, ok := ret.Get(0).(func(context.Context, time.Time, storage.Handler) bool); ok {
+		r0 = rf(ctx, olderThan, handler)
 	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]storage.ScheduledMessage)
-		}
+		r0 = ret.Get(0).(bool)
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, time.Time, int) error); ok {
-		r1 = rf(ctx, olderThan, limit)
+	if rf, ok := ret.Get(1).(func(context.Context, time.Time, storage.Handler) error); ok {
+		r1 = rf(ctx, olderThan, handler)
 	} else {
 		r1 = ret.Error(1)
 	}
