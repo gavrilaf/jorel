@@ -14,8 +14,8 @@ type Handler struct {
 	mock.Mock
 }
 
-// Handle provides a mock function with given fields: ctx, msg
-func (_m *Handler) Handle(ctx context.Context, msg storage.ScheduledMessage) error {
+// HandleMessage provides a mock function with given fields: ctx, msg
+func (_m *Handler) HandleMessage(ctx context.Context, msg storage.ScheduledMessage) error {
 	ret := _m.Called(ctx, msg)
 
 	var r0 error

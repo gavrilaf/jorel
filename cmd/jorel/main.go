@@ -9,8 +9,8 @@ import (
 	"time"
 
 	"github.com/gavrilaf/dyson/pkg/dlog"
-	"github.com/gavrilaf/dyson/pkg/scheduler"
 	"github.com/gavrilaf/dyson/pkg/msgqueue"
+	"github.com/gavrilaf/dyson/pkg/scheduler"
 	"github.com/gavrilaf/dyson/pkg/testdata"
 )
 
@@ -36,13 +36,13 @@ func main() {
 
 	logger.Info("Starting jor-el")
 
-	config := scheduler.HandlerConfig{
+	config := scheduler.IngressConfig{
 		Publisher: publisher,
 		Storage: storage,
 		TimeSource: scheduler.SystemTime{},
 	}
 
-	handler := scheduler.NewHandler(config)
+	handler := scheduler.NewIngress(config)
 
 	err = receiver.Run(ctx, handler)
 	if err != nil {

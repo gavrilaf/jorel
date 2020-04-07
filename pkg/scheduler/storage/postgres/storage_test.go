@@ -46,7 +46,7 @@ func TestStorageBase(t *testing.T) {
 	assert.NoError(t, err)
 
 	handler := &storagemocks.Handler{}
-	handler.On("Handle", mock.Anything, mock.Anything).Return(nil)
+	handler.On("HandleMessage", mock.Anything, mock.Anything).Return(nil)
 
 	scanTime := now.Add(15 * time.Second)
 
@@ -58,7 +58,7 @@ func TestStorageBase(t *testing.T) {
 		Message:       msgWithAttributes,
 		ScheduledTime: fiveSecs,
 	}
-	handler.AssertCalled(t, "Handle", mock.Anything, expectedMessage)
+	handler.AssertCalled(t, "HandleMessage", mock.Anything, expectedMessage)
 
 	handled,err = stg.GetLatest(ctx, scanTime, handler)
 	assert.NoError(t, err)
@@ -68,13 +68,13 @@ func TestStorageBase(t *testing.T) {
 		Message:       msgWithEmptyAttributes,
 		ScheduledTime: tenSecs,
 	}
-	handler.AssertCalled(t, "Handle", mock.Anything, expectedMessage)
+	handler.AssertCalled(t, "HandleMessage", mock.Anything, expectedMessage)
 
 	handled, err = stg.GetLatest(ctx, scanTime, handler)
 	assert.NoError(t, err)
 	assert.False(t, handled)
 
-	handler.AssertNumberOfCalls(t, "Handle", 2)
+	handler.AssertNumberOfCalls(t, "HandleMessage", 2)
 
 	t.Logf("cleaning up...")
 	err = cleanupDb(ctx)
@@ -118,7 +118,7 @@ func TestStorageBigObject(t *testing.T) {
 	assert.NoError(t, err)
 
 	handler := &storagemocks.Handler{}
-	handler.On("Handle", mock.Anything, mock.Anything).Return(nil)
+	handler.On("HandleMessage", mock.Anything, mock.Anything).Return(nil)
 
 	scanTime := scheduledTime.Add(1 * time.Second)
 
@@ -130,13 +130,13 @@ func TestStorageBigObject(t *testing.T) {
 		Message:       message,
 		ScheduledTime: scheduledTime,
 	}
-	handler.AssertCalled(t, "Handle", mock.Anything, expectedMessage)
+	handler.AssertCalled(t, "HandleMessage", mock.Anything, expectedMessage)
 
 	handled,err = stg.GetLatest(ctx, scanTime, handler)
 	assert.NoError(t, err)
 	assert.False(t, handled)
 
-	handler.AssertNumberOfCalls(t, "Handle", 1)
+	handler.AssertNumberOfCalls(t, "HandleMessage", 1)
 
 	t.Logf("cleaning up...")
 	err = cleanupDb(ctx)
@@ -175,7 +175,7 @@ func TestStorageConcurrency(t *testing.T) {
 
 		for continueHandling {
 			handler := &storagemocks.Handler{}
-			handler.On("Handle", mock.Anything, mock.Anything).Return(nil)
+			handler.On("HandleMessage", mock.Anything, mock.Anything).Return(nil)
 
 			continueHandling, err = stg.GetLatest(ctx, scanTime, handler)
 			assert.NoError(t, err)
@@ -200,12 +200,12 @@ func TestStorageConcurrency(t *testing.T) {
 	assert.Equal(t, objectsCount, counter)
 
 	handler := &storagemocks.Handler{}
-	handler.On("Handle", mock.Anything, mock.Anything).Return(nil)
+	handler.On("HandleMessage", mock.Anything, mock.Anything).Return(nil)
 
 	handled, err := stg.GetLatest(ctx, scanTime, handler)
 	assert.NoError(t, err)
 	assert.False(t, handled)
-	handler.AssertNumberOfCalls(t, "Handle", 0)
+	handler.AssertNumberOfCalls(t, "HandleMessage", 0)
 
 	t.Logf("cleaning up...")
 	err = cleanupDb(ctx)

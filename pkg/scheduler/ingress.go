@@ -10,27 +10,27 @@ import (
 	"github.com/gavrilaf/dyson/pkg/scheduler/storage"
 )
 
-type HandlerConfig struct {
+type IngressConfig struct {
 	Publisher  msgqueue.Publisher
 	Storage    storage.SchedulerStorage
 	TimeSource TimeSource
 }
 
-type Handler struct {
+type Ingress struct {
 	publisher  msgqueue.Publisher
 	storage    storage.SchedulerStorage
 	timeSource TimeSource
 }
 
-func NewHandler(config HandlerConfig) *Handler {
-	return &Handler{
+func NewIngress(config IngressConfig) *Ingress {
+	return &Ingress{
 		publisher:  config.Publisher,
 		storage:    config.Storage,
 		timeSource: config.TimeSource,
 	}
 }
 
-func (h *Handler) Receive(ctx context.Context, data []byte, attributes map[string]string) error {
+func (h *Ingress) Receive(ctx context.Context, data []byte, attributes map[string]string) error {
 	msgAttributes, err := msgqueue.NewMsgAttributes(attributes)
 	if err != nil {
 		return fmt.Errorf("failed to parse attributes, %w", err)
@@ -43,7 +43,7 @@ func (h *Handler) Receive(ctx context.Context, data []byte, attributes map[strin
 	}
 }
 
-func (h *Handler) publish(ctx context.Context, data []byte, attributes map[string]string) error {
+func (h *Ingress) publish(ctx context.Context, data []byte, attributes map[string]string) error {
 	result, err := h.publisher.Publish(ctx, data, attributes)
 	if err != nil {
 		return fmt.Errorf("failed to publish message, %w", err)
@@ -59,7 +59,7 @@ func (h *Handler) publish(ctx context.Context, data []byte, attributes map[strin
 	return nil
 }
 
-func (h *Handler) save(ctx context.Context, data []byte, msgAttributes msgqueue.MsgAttributes) error {
+func (h *Ingress) save(ctx context.Context, data []byte, msgAttributes msgqueue.MsgAttributes) error {
 	scheduledTime := h.timeSource.Now().Add(msgAttributes.DelayInSeconds * time.Second)
 
 	message := storage.Message{

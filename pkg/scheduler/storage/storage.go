@@ -18,7 +18,7 @@ type ScheduledMessage struct {
 
 //go:generate mockery -name Handler -outpkg storagemocks -output ./storagemocks -dir .
 type Handler interface {
-	Handle(ctx context.Context, msg ScheduledMessage) error
+	HandleMessage(ctx context.Context, msg ScheduledMessage) error
 }
 
 //go:generate mockery -name SchedulerStorage -outpkg storagemocks -output ./storagemocks -dir .

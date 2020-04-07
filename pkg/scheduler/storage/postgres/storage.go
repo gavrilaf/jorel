@@ -92,7 +92,7 @@ func (s *storage) GetLatest(ctx context.Context, olderThan time.Time, handler ba
 			ScheduledTime: scheduledTime.UTC(),
 		}
 
-		err := handler.Handle(ctx, msg)
+		err := handler.HandleMessage(ctx, msg)
 		if err != nil {
 			tx.Rollback(ctx)
 			return false, fmt.Errorf("failed to handler message, %w", err)

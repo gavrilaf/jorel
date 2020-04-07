@@ -26,18 +26,18 @@ func TestHandlerReceive(t *testing.T) {
 	publishResult.On("GetMessageID", mock.Anything).Return("1", nil)
 
 	t.Run("no delay attribute", func(t *testing.T) {
-		subject, _ := subjectWithMocks()
+		ingress, _ := ingressWithMocks()
 
-		err := subject.Receive(ctx, data, map[string]string{})
+		err := ingress.Receive(ctx, data, map[string]string{})
 		assert.Error(t, err)
 	})
 
 	t.Run("immediately resend empty attributes", func(t *testing.T) {
-		subject, m := subjectWithMocks()
+		ingress, m := ingressWithMocks()
 
 		m.publisher.On("Publish", mock.Anything, mock.Anything, mock.Anything).Return(publishResult, nil)
 
-		err := subject.Receive(ctx, data, map[string]string{"jor-el-delay": "0"})
+		err := ingress.Receive(ctx, data, map[string]string{"jor-el-delay": "0"})
 		assert.NoError(t, err)
 
 		var empty map[string]string
@@ -45,32 +45,32 @@ func TestHandlerReceive(t *testing.T) {
 	})
 
 	t.Run("immediately resend with attributes", func(t *testing.T) {
-		subject, m := subjectWithMocks()
+		ingress, m := ingressWithMocks()
 
 		m.publisher.On("Publish", mock.Anything, mock.Anything, mock.Anything).Return(publishResult, nil)
 
-		err := subject.Receive(ctx, data, map[string]string{"jor-el-delay": "0", "one": "two"})
+		err := ingress.Receive(ctx, data, map[string]string{"jor-el-delay": "0", "one": "two"})
 		assert.NoError(t, err)
 
 		m.publisher.AssertCalled(t, "Publish", mock.Anything, data, map[string]string{"one": "two"})
 	})
 
 	t.Run("when publisher fails", func(t *testing.T) {
-		subject, m := subjectWithMocks()
+		ingress, m := ingressWithMocks()
 
 		m.publisher.On("Publish", mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf(""))
 
-		err := subject.Receive(ctx, data, map[string]string{"jor-el-delay": "0", "one": "two"})
+		err := ingress.Receive(ctx, data, map[string]string{"jor-el-delay": "0", "one": "two"})
 		assert.Error(t, err)
 	})
 
 	t.Run("save with empty attributes", func(t *testing.T) {
-		subject, m := subjectWithMocks()
+		ingress, m := ingressWithMocks()
 
 		m.timeSource.On("Now").Return(now)
 		m.storage.On("Save", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 
-		err := subject.Receive(ctx, data, map[string]string{"jor-el-delay": "5"})
+		err := ingress.Receive(ctx, data, map[string]string{"jor-el-delay": "5"})
 		assert.NoError(t, err)
 
 		expectedTime := now.Add(5 * time.Second)
@@ -82,12 +82,12 @@ func TestHandlerReceive(t *testing.T) {
 	})
 
 	t.Run("save with attributes", func(t *testing.T) {
-		subject, m := subjectWithMocks()
+		ingress, m := ingressWithMocks()
 
 		m.timeSource.On("Now").Return(now)
 		m.storage.On("Save", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 
-		err := subject.Receive(ctx, data, map[string]string{"jor-el-delay": "20", "one": "two"})
+		err := ingress.Receive(ctx, data, map[string]string{"jor-el-delay": "20", "one": "two"})
 		assert.NoError(t, err)
 
 		expectedTime := now.Add(20 * time.Second)
@@ -100,34 +100,34 @@ func TestHandlerReceive(t *testing.T) {
 	})
 
 	t.Run("when storage fails", func(t *testing.T) {
-		subject, m := subjectWithMocks()
+		ingress, m := ingressWithMocks()
 
 		m.timeSource.On("Now").Return(now)
 		m.storage.On("Save", mock.Anything, mock.Anything, mock.Anything).Return(fmt.Errorf(""))
 
-		err := subject.Receive(ctx, data, map[string]string{"jor-el-delay": "5"})
+		err := ingress.Receive(ctx, data, map[string]string{"jor-el-delay": "5"})
 		assert.Error(t, err)
 	})
 }
 
-type mocks struct {
+type ingressMocks struct {
 	publisher  *msgqueuemocks.Publisher
 	storage    *storagemocks.SchedulerStorage
 	timeSource *schedulermocks.TimeSource
 }
 
-func subjectWithMocks() (*scheduler.Handler, mocks) {
-	m := mocks{
+func ingressWithMocks() (*scheduler.Ingress, ingressMocks) {
+	m := ingressMocks{
 		publisher:  &msgqueuemocks.Publisher{},
 		storage:    &storagemocks.SchedulerStorage{},
 		timeSource: &schedulermocks.TimeSource{},
 	}
 
-	subject := scheduler.NewHandler(scheduler.HandlerConfig{
+	ingress := scheduler.NewIngress(scheduler.IngressConfig{
 		Publisher:  m.publisher,
 		Storage:    m.storage,
 		TimeSource: m.timeSource,
 	})
 
-	return subject, m
+	return ingress, m
 }
