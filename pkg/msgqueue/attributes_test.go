@@ -2,7 +2,6 @@ package msgqueue_test
 
 import (
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 
@@ -17,7 +16,7 @@ func TestMsgAttributes(t *testing.T) {
 		{
 			name: "only with delay field",
 			msgAttrs: msgqueue.MsgAttributes{
-				DelayInSeconds: 10*time.Second,
+				DelayInSeconds: 10,
 			},
 		},
 		{
@@ -27,7 +26,7 @@ func TestMsgAttributes(t *testing.T) {
 		{
 			name: "with other attributes",
 			msgAttrs: msgqueue.MsgAttributes{
-				DelayInSeconds: 86400*time.Second,
+				DelayInSeconds: 86400,
 				Original:       map[string]string{"one": "two", "three": "four"},
 			},
 		},

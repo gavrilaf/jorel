@@ -36,6 +36,8 @@ func (h *Ingress) Receive(ctx context.Context, data []byte, attributes map[strin
 		return fmt.Errorf("failed to parse attributes, %w", err)
 	}
 
+	dlog.FromContext(ctx).Infof("Received message with delay: %d", msgAttributes.DelayInSeconds)
+
 	if msgAttributes.DelayInSeconds == 0 {
 		return h.publish(ctx, data, msgAttributes.Original)
 	} else {
@@ -60,12 +62,13 @@ func (h *Ingress) publish(ctx context.Context, data []byte, attributes map[strin
 }
 
 func (h *Ingress) save(ctx context.Context, data []byte, msgAttributes msgqueue.MsgAttributes) error {
-	scheduledTime := h.timeSource.Now().Add(msgAttributes.DelayInSeconds * time.Second)
+	scheduledTime := h.timeSource.Now().Add(time.Duration(msgAttributes.DelayInSeconds) * time.Second)
 
 	message := storage.Message{
 		Data:       data,
 		Attributes: msgAttributes.Original,
 	}
 
+	dlog.FromContext(ctx).Infof("Save message with scheduled time: %v", scheduledTime)
 	return h.storage.Save(ctx, scheduledTime, message)
 }

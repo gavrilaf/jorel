@@ -3,7 +3,6 @@ package msgqueue
 import (
 	"fmt"
 	"strconv"
-	"time"
 )
 
 const (
@@ -11,28 +10,28 @@ const (
 )
 
 type MsgAttributes struct {
-	DelayInSeconds time.Duration
+	DelayInSeconds int
 	Original       map[string]string
 }
 
-func (ma MsgAttributes) GetAttributes() map[string]string {
+func (m MsgAttributes) GetAttributes() map[string]string {
 	attributes := make(map[string]string)
 
-	for k, v := range ma.Original {
+	for k, v := range m.Original {
 		attributes[k] = v
 	}
 
-	attributes[delayInSecondsKey] = strconv.FormatInt(int64(ma.DelayInSeconds), 10)
+	attributes[delayInSecondsKey] = strconv.Itoa(m.DelayInSeconds)
 
 	return attributes
 }
 
 func NewMsgAttributes(attributes map[string]string) (MsgAttributes, error) {
-	var delay int64
+	var delay int
 	var err error
 
 	if strDelay, ok := attributes[delayInSecondsKey]; ok {
-		delay, err = strconv.ParseInt(strDelay, 10, 64)
+		delay, err = strconv.Atoi(strDelay)
 		if err != nil {
 			return MsgAttributes{}, fmt.Errorf("couldn't parse message delay, %w", err)
 		}
@@ -54,7 +53,7 @@ func NewMsgAttributes(attributes map[string]string) (MsgAttributes, error) {
 	}
 
 	return MsgAttributes{
-		DelayInSeconds: time.Duration(delay),
+		DelayInSeconds: delay,
 		Original:       other,
 	}, nil
 }

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v4/log/logrusadapter"
 	"github.com/jackc/pgx/v4/pgxpool"
 
@@ -26,6 +27,7 @@ func NewStorage(ctx context.Context, databaseUrl string) (base.SchedulerStorage,
 	}
 
 	poolConfig.ConnConfig.Logger = log
+	poolConfig.ConnConfig.LogLevel = pgx.LogLevelWarn
 
 	db, err := pgxpool.ConnectConfig(ctx, poolConfig)
 	if err != nil {
@@ -36,7 +38,6 @@ func NewStorage(ctx context.Context, databaseUrl string) (base.SchedulerStorage,
 		db: db,
 	}, nil
 }
-
 
 func (s *storage) Save(ctx context.Context, scheduledTime time.Time, msg base.Message) error {
 	attributes, err := json.Marshal(msg.Attributes)
@@ -56,8 +57,8 @@ func (s *storage) GetLatest(ctx context.Context, olderThan time.Time, handler ba
 	}
 
 	sql := "UPDATE messages SET done = 't' WHERE id = (SELECT id " +
-				"FROM messages WHERE done = 'f' AND scheduledtime <= $1 " +
-				"ORDER BY scheduledtime FOR UPDATE SKIP LOCKED LIMIT 1) RETURNING scheduledtime, data, attributes;"
+		"FROM messages WHERE done = 'f' AND scheduledtime <= $1 " +
+		"ORDER BY scheduledtime FOR UPDATE SKIP LOCKED LIMIT 1) RETURNING scheduledtime, data, attributes;"
 
 	rows, err := tx.Query(ctx, sql, olderThan)
 	if err != nil {
@@ -85,7 +86,7 @@ func (s *storage) GetLatest(ctx context.Context, olderThan time.Time, handler ba
 		}
 
 		msg := base.ScheduledMessage{
-			Message:       base.Message{
+			Message: base.Message{
 				Data:       data,
 				Attributes: parsedAttrs,
 			},

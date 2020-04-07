@@ -12,7 +12,7 @@ const (
 type Message struct {
 	ID               string
 	Created          time.Time
-	ScheduleDuration time.Duration
+	ScheduleDuration int
 }
 
 func (m *Message) String() string {
@@ -20,7 +20,7 @@ func (m *Message) String() string {
 }
 
 func (m* Message) Check() (bool, time.Duration) {
-	diff := abs(time.Now().Sub(m.Created.Add(m.ScheduleDuration)))
+	diff := abs(time.Now().Sub(m.Created.Add(time.Duration(m.ScheduleDuration) * time.Second)))
 	return diff <= AcceptableDelta, diff
 }
 

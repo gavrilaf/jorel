@@ -3,19 +3,19 @@ package postgres_test
 import (
 	"context"
 	"encoding/json"
-	"github.com/gavrilaf/dyson/pkg/scheduler/storage"
-	"github.com/gavrilaf/dyson/pkg/scheduler/storage/storagemocks"
-	"github.com/jackc/pgx/v4"
-	"github.com/stretchr/testify/mock"
 	"os"
 	"runtime"
 	"sync"
 	"testing"
 	"time"
 
+	"github.com/jackc/pgx/v4"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 
+	"github.com/gavrilaf/dyson/pkg/scheduler/storage"
 	"github.com/gavrilaf/dyson/pkg/scheduler/storage/postgres"
+	"github.com/gavrilaf/dyson/pkg/scheduler/storage/storagemocks"
 )
 
 func TestStorageBase(t *testing.T) {
@@ -36,7 +36,7 @@ func TestStorageBase(t *testing.T) {
 	}
 
 	msgWithEmptyAttributes := storage.Message{
-		Data:       []byte("1234567"),
+		Data: []byte("1234567"),
 	}
 
 	err = stg.Save(ctx, fiveSecs, msgWithAttributes)
@@ -60,7 +60,7 @@ func TestStorageBase(t *testing.T) {
 	}
 	handler.AssertCalled(t, "HandleMessage", mock.Anything, expectedMessage)
 
-	handled,err = stg.GetLatest(ctx, scanTime, handler)
+	handled, err = stg.GetLatest(ctx, scanTime, handler)
 	assert.NoError(t, err)
 	assert.True(t, handled)
 
@@ -97,13 +97,13 @@ func TestStorageBigObject(t *testing.T) {
 	}
 
 	object := struct {
-		ID string
+		ID          string
 		SomeBigData []int
-		SomeMap map[string]interface{}
+		SomeMap     map[string]interface{}
 	}{
-		ID: "12345",
+		ID:          "12345",
 		SomeBigData: bigData,
-		SomeMap: map[string]interface{}{ "one": "two", "three": 3, "four": bigData},
+		SomeMap:     map[string]interface{}{"one": "two", "three": 3, "four": bigData},
 	}
 
 	marshaledObject, err := json.Marshal(&object)
@@ -132,7 +132,7 @@ func TestStorageBigObject(t *testing.T) {
 	}
 	handler.AssertCalled(t, "HandleMessage", mock.Anything, expectedMessage)
 
-	handled,err = stg.GetLatest(ctx, scanTime, handler)
+	handled, err = stg.GetLatest(ctx, scanTime, handler)
 	assert.NoError(t, err)
 	assert.False(t, handled)
 
@@ -169,9 +169,9 @@ func TestStorageConcurrency(t *testing.T) {
 	var wg sync.WaitGroup
 	counter := 0
 
-	handleFn := func () {
+	handleFn := func() {
 		continueHandling := true
-		var err  error
+		var err error
 
 		for continueHandling {
 			handler := &storagemocks.Handler{}
@@ -212,7 +212,6 @@ func TestStorageConcurrency(t *testing.T) {
 	assert.NoError(t, err)
 }
 
-
 func cleanupDb(ctx context.Context) error {
 	dbUrl := os.Getenv("JOR_EL_POSTGRES_TEST_URL")
 
@@ -224,4 +223,3 @@ func cleanupDb(ctx context.Context) error {
 	_, err = conn.Exec(ctx, "delete from messages")
 	return err
 }
-

@@ -3,9 +3,9 @@ package scheduler
 import (
 	"context"
 	"fmt"
-	"github.com/gavrilaf/dyson/pkg/dlog"
 	"time"
 
+	"github.com/gavrilaf/dyson/pkg/dlog"
 	"github.com/gavrilaf/dyson/pkg/msgqueue"
 	"github.com/gavrilaf/dyson/pkg/scheduler/storage"
 )
@@ -30,9 +30,8 @@ func NewTicker(config TickerConfig) *Ticker {
 	}
 }
 
-// Ticker messages handler
 // Activates ticker loop
-func (h *Ticker) Receive(ctx context.Context, data []byte, attributes map[string]string) error {
+func (h *Ticker) Tick(ctx context.Context) error {
 	return h.handleTick(ctx)
 }
 
@@ -41,7 +40,7 @@ func (h *Ticker) handleTick(ctx context.Context) error {
 
 	counter := 0
 	continueHandling := true
-	var err  error
+	var err error
 
 	for continueHandling {
 		continueHandling, err = h.storage.GetLatest(ctx, scanTime, h)
@@ -49,7 +48,9 @@ func (h *Ticker) handleTick(ctx context.Context) error {
 			dlog.FromContext(ctx).WithError(err).Error("failed to handle message")
 			break
 		}
-		counter += 1
+		if continueHandling {
+			counter += 1
+		}
 	}
 
 	dlog.FromContext(ctx).Infof("handled %d messages, scan time: %v", counter, scanTime)
@@ -66,4 +67,3 @@ func (h *Ticker) HandleMessage(ctx context.Context, msg storage.ScheduledMessage
 
 	return nil
 }
-

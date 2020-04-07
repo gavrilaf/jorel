@@ -26,7 +26,7 @@ func TestTickerReceive(t *testing.T) {
 		mocks.timeSource.On("Now").Return(now)
 		mocks.storage.On("GetLatest", mock.Anything, mock.Anything, mock.Anything).Return(false, nil)
 
-		err := ticker.Receive(ctx, []byte(""), map[string]string{})
+		err := ticker.Tick(ctx)
 		assert.NoError(t, err)
 
 		mocks.storage.AssertCalled(t, "GetLatest", mock.Anything, now.Add(1 * time.Second), ticker)
@@ -46,7 +46,7 @@ func TestTickerReceive(t *testing.T) {
 			return true
 		}, nil)
 
-		err := ticker.Receive(ctx, []byte(""), map[string]string{})
+		err := ticker.Tick(ctx)
 		assert.NoError(t, err)
 
 		mocks.storage.AssertCalled(t, "GetLatest", mock.Anything, now.Add(1 * time.Second), ticker)
@@ -60,7 +60,7 @@ func TestTickerReceive(t *testing.T) {
 		mocks.timeSource.On("Now").Return(now)
 		mocks.storage.On("GetLatest", mock.Anything, mock.Anything, mock.Anything).Return(false, fmt.Errorf(""))
 
-		err := ticker.Receive(ctx, []byte(""), map[string]string{})
+		err := ticker.Tick(ctx)
 		assert.Error(t, err)
 	})
 }

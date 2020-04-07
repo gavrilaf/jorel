@@ -26,18 +26,20 @@ func main() {
 
 	publisherID := uuid.New().String()
 
-	durations := []time.Duration{
+	delays := []int{
 		0,
-		5 * time.Second,
-		10 * time.Second,
-		time.Minute,
+		5,
+		10,
+		60,
 	}
 
-	for indx, d := range durations {
+	for indx, d := range delays {
 		id := fmt.Sprintf("%s-%d", publisherID, indx)
+		now  := time.Now().UTC()
+
 		m := testdata.Message{
 			ID:               id,
-			Created:          time.Now(),
+			Created:          now,
 			ScheduleDuration: d,
 		}
 
@@ -56,12 +58,9 @@ func main() {
 			logger.Panicf("failed to publish message, %v", err)
 		}
 
-		messageID, err := res.GetMessageID(ctx)
-		if err != nil {
-			logger.Panicf("failed to read message ID, %v", err)
-		}
+		res.GetMessageID(ctx)
 
-		logger.Infof("Published message with ID: %s", messageID)
+		scheduledTime := now.Add(time.Duration(d) * time.Second)
+		logger.Infof("Published message with ID: %s, duration %d, should executed in: %v", id, d, scheduledTime)
 	}
-
 }

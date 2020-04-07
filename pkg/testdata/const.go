@@ -8,4 +8,5 @@ const (
 
 	IngressSubs = "jor-el-ingress-sub"
 	EgressSubs = "jor-el-egress-sub"
+	TickerSubs = "jor-el-ticker-sub"
 )

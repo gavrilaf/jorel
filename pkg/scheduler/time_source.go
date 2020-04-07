@@ -10,6 +10,6 @@ type TimeSource interface {
 type SystemTime struct{}
 
 func (SystemTime) Now() time.Time {
-	return time.Now()
+	return time.Now().UTC()
 }
 
