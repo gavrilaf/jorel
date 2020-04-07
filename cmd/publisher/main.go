@@ -4,6 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"math/rand"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/google/uuid"
@@ -27,40 +31,71 @@ func main() {
 	publisherID := uuid.New().String()
 
 	delays := []int{
-		0,
-		5,
-		10,
+		85,
+		800,
+		45,
 		60,
+		45,
+		200,
+		150,
+		45,
+		30,
+		600,
 	}
 
-	for indx, d := range delays {
-		id := fmt.Sprintf("%s-%d", publisherID, indx)
-		now  := time.Now().UTC()
+	sendCount := 0
+	startTime := time.Now()
 
-		m := testdata.Message{
-			ID:               id,
-			Created:          now,
-			ScheduleDuration: d,
+	for repeat := 0; repeat < 100; repeat++ {
+		for indx, d := range delays {
+			id := fmt.Sprintf("%s-%d", publisherID, indx)
+			now := time.Now().UTC()
+
+			d += rand.Intn(10)
+
+			m := testdata.Message{
+				ID:               id,
+				Created:          now,
+				ScheduleDuration: d,
+			}
+
+			data, err := json.Marshal(&m)
+			if err != nil {
+				logger.Panicf("failed to marshal message, %v", err)
+			}
+
+			attributes := msgqueue.MsgAttributes{
+				DelayInSeconds: d,
+				Original:       map[string]string{"one": "two"},
+			}
+
+			_, err = publisher.Publish(ctx, data, attributes.GetAttributes())
+			if err != nil {
+				logger.Panicf("failed to publish message, %v", err)
+			}
+
+			scheduledTime := now.Add(time.Duration(d) * time.Second)
+			logger.Infof("Published message with ID: %s, duration %d, should executed in: %v", id, d, scheduledTime)
+
+			sendCount += 1
 		}
 
-		data, err := json.Marshal(&m)
-		if err != nil {
-			logger.Panicf("failed to marshal message, %v", err)
-		}
+		time.Sleep(1 * time.Second)
+	}
 
-		attributes := msgqueue.MsgAttributes{
-			DelayInSeconds: d,
-			Original:       map[string]string{"one": "two"},
-		}
+	endTime := time.Now()
 
-		res, err := publisher.Publish(ctx, data, attributes.GetAttributes())
-		if err != nil {
-			logger.Panicf("failed to publish message, %v", err)
-		}
+	logger.Infof("Send %d messages, %v", sendCount, endTime.Sub(startTime))
 
-		res.GetMessageID(ctx)
+	c := make(chan os.Signal, 2)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		<-c
+		logger.Info("Ctrl+C pressed in Terminal")
+		os.Exit(0)
+	}()
 
-		scheduledTime := now.Add(time.Duration(d) * time.Second)
-		logger.Infof("Published message with ID: %s, duration %d, should executed in: %v", id, d, scheduledTime)
+	for {
+		time.Sleep(time.Second)
 	}
 }

@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	AcceptableDelta = 2 * time.Second
+	AcceptableDelta = 10 * time.Second
 )
 
 type Message struct {

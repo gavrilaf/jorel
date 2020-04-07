@@ -56,8 +56,12 @@ func (s *storage) GetLatest(ctx context.Context, olderThan time.Time, handler ba
 		return false, fmt.Errorf("failed to start transaction, %w", err)
 	}
 
-	sql := "UPDATE messages SET done = 't' WHERE id = (SELECT id " +
-		"FROM messages WHERE done = 'f' AND scheduledtime <= $1 " +
+	//sql := "UPDATE messages SET done = 't' WHERE id = (SELECT id " +
+	//	"FROM messages WHERE done = 'f' AND scheduledtime <= $1 " +
+	//	"ORDER BY scheduledtime FOR UPDATE SKIP LOCKED LIMIT 1) RETURNING scheduledtime, data, attributes;"
+
+	sql := "DELETE FROM messages WHERE id = (SELECT id " +
+		"FROM messages WHERE scheduledtime <= $1 " +
 		"ORDER BY scheduledtime FOR UPDATE SKIP LOCKED LIMIT 1) RETURNING scheduledtime, data, attributes;"
 
 	rows, err := tx.Query(ctx, sql, olderThan)

@@ -10,6 +10,8 @@ import (
 	"github.com/gavrilaf/dyson/pkg/scheduler/storage"
 )
 
+const deviationTimeInSeconds = 2
+
 type TickerConfig struct {
 	Publisher  msgqueue.Publisher
 	Storage    storage.SchedulerStorage
@@ -36,7 +38,7 @@ func (h *Ticker) Tick(ctx context.Context) error {
 }
 
 func (h *Ticker) handleTick(ctx context.Context) error {
-	scanTime := h.timeSource.Now().Add(1 * time.Second)
+	scanTime := h.timeSource.Now().Add(deviationTimeInSeconds * time.Second)
 
 	counter := 0
 	continueHandling := true

@@ -13,6 +13,11 @@ import (
 	"github.com/gavrilaf/dyson/pkg/testdata"
 )
 
+var receivedCount = 0
+var outboundCount = 0
+var meanDeviation = time.Duration(0)
+var maxDeviation = time.Duration(0)
+
 type handler struct {}
 
 func (handler) Receive(ctx context.Context, data []byte, attributes map[string]string) error {
@@ -22,10 +27,22 @@ func (handler) Receive(ctx context.Context, data []byte, attributes map[string]s
 		return err
 	}
 
-	dlog.FromContext(ctx).Infof("Received message: %v", msg)
-
+	now := time.Now().UTC()
 	checked, diff := msg.Check()
-	dlog.FromContext(ctx).Infof("Message ID: %s, checked=%v, difference=%v", msg.ID, checked, diff)
+
+	receivedCount += 1
+	if !checked {
+		dlog.FromContext(ctx).Warnf("** %v: Message %v, checked=%v, difference=%v", now, msg, checked, diff)
+		outboundCount += 1
+	} else {
+		dlog.FromContext(ctx).Infof("** %v: Message %v, checked=%v, difference=%v", now, msg, checked, diff)
+	}
+
+	if diff > maxDeviation {
+		maxDeviation = diff
+	}
+
+	meanDeviation += diff
 
 	return nil
 }
@@ -50,6 +67,10 @@ func main() {
 
 		err := receiver.Close()
 		logger.Infof("receiver closed, error=%v", err)
+
+		meanDeviation = meanDeviation / time.Duration(receivedCount)
+
+		logger.Infof("received messages %d, outbound %d, max deviation %v, mean deviation %v", receivedCount, outboundCount, maxDeviation, meanDeviation)
 
 		os.Exit(0)
 	}()
