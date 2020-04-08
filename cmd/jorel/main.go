@@ -3,15 +3,13 @@ package main
 import (
 	"context"
 	"os"
-	"os/signal"
-	"syscall"
-	"time"
 
 	"github.com/gavrilaf/dyson/pkg/dlog"
 	"github.com/gavrilaf/dyson/pkg/msgqueue"
 	"github.com/gavrilaf/dyson/pkg/scheduler"
 	"github.com/gavrilaf/dyson/pkg/scheduler/storage/postgres"
 	"github.com/gavrilaf/dyson/pkg/testdata"
+	"github.com/gavrilaf/dyson/pkg/utils"
 )
 
 func main() {
@@ -63,26 +61,16 @@ func main() {
 
 	ticker := scheduler.NewTicker(tickerConfig)
 
-	done := false
+	cancelCtx, cancelFn := context.WithCancel(ctx)
 
-	go func() {
-		for !done {
-			ticker.Tick(ctx)
-			time.Sleep(time.Second)
-		}
-	}()
+	ticker.RunTicker(cancelCtx)
 
 	// done
 
 	logger.Info("Jor-el started")
 
-	c := make(chan os.Signal, 2)
-	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
-	go func() {
-		<-c
-		logger.Info("Ctrl+C pressed in Terminal")
-
-		done = true
+	utils.WaitForShutdown(ctx, func() {
+		cancelFn()
 
 		err := ingressReceiver.Close()
 		logger.Infof("ingressReceiver closed, error=%v", err)
@@ -92,11 +80,5 @@ func main() {
 
 		err = storage.Close()
 		logger.Infof("storage closed, error=%v", err)
-
-		os.Exit(0)
-	}()
-
-	for {
-		time.Sleep(time.Second)
-	}
+	})
 }

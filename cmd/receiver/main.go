@@ -3,14 +3,12 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"os"
-	"os/signal"
-	"syscall"
 	"time"
 
 	"github.com/gavrilaf/dyson/pkg/dlog"
 	"github.com/gavrilaf/dyson/pkg/msgqueue"
 	"github.com/gavrilaf/dyson/pkg/testdata"
+	"github.com/gavrilaf/dyson/pkg/utils"
 )
 
 var receivedCount = 0
@@ -59,23 +57,12 @@ func main() {
 	logger.Info("Starting receiver")
 	err = receiver.Run(ctx, handler{})
 
-	c := make(chan os.Signal, 2)
-	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
-	go func() {
-		<-c
-		logger.Info("Ctrl+C pressed in Terminal")
-
+	utils.WaitForShutdown(ctx, func() {
 		err := receiver.Close()
 		logger.Infof("receiver closed, error=%v", err)
 
 		meanDeviation = meanDeviation / time.Duration(receivedCount)
 
 		logger.Infof("received messages %d, outbound %d, max deviation %v, mean deviation %v", receivedCount, outboundCount, maxDeviation, meanDeviation)
-
-		os.Exit(0)
-	}()
-
-	for {
-		time.Sleep(time.Second)
-	}
+	})
 }

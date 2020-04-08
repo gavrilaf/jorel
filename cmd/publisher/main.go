@@ -5,9 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/rand"
-	"os"
-	"os/signal"
-	"syscall"
 	"time"
 
 	"github.com/google/uuid"
@@ -15,6 +12,7 @@ import (
 	"github.com/gavrilaf/dyson/pkg/dlog"
 	"github.com/gavrilaf/dyson/pkg/msgqueue"
 	"github.com/gavrilaf/dyson/pkg/testdata"
+	"github.com/gavrilaf/dyson/pkg/utils"
 )
 
 func main() {
@@ -43,7 +41,7 @@ func main() {
 		600,
 	}
 
-	sendCount := 0
+	sentCount := 0
 	startTime := time.Now()
 
 	for repeat := 0; repeat < 100; repeat++ {
@@ -77,7 +75,7 @@ func main() {
 			scheduledTime := now.Add(time.Duration(d) * time.Second)
 			logger.Infof("Published message with ID: %s, duration %d, should executed in: %v", id, d, scheduledTime)
 
-			sendCount += 1
+			sentCount += 1
 		}
 
 		time.Sleep(1 * time.Second)
@@ -85,17 +83,7 @@ func main() {
 
 	endTime := time.Now()
 
-	logger.Infof("Send %d messages, %v", sendCount, endTime.Sub(startTime))
+	logger.Infof("Sent %d messages, %v", sentCount, endTime.Sub(startTime))
 
-	c := make(chan os.Signal, 2)
-	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
-	go func() {
-		<-c
-		logger.Info("Ctrl+C pressed in Terminal")
-		os.Exit(0)
-	}()
-
-	for {
-		time.Sleep(time.Second)
-	}
+	utils.WaitForShutdown(ctx, func() {})
 }

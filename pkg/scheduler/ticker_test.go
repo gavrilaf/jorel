@@ -6,8 +6,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus/hooks/test"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
 
 	"github.com/gavrilaf/dyson/pkg/msgqueue/msgqueuemocks"
 	"github.com/gavrilaf/dyson/pkg/scheduler"
@@ -21,19 +24,40 @@ func TestTickerReceive(t *testing.T) {
 	now := time.Now()
 
 	t.Run("storage does not contain eligible messages", func(t *testing.T) {
+		cancelCtx, cancel := context.WithCancel(ctx)
 		ticker, mocks := tickerWithMocks()
+		hook := test.NewGlobal()
 
 		mocks.timeSource.On("Now").Return(now)
 		mocks.storage.On("GetLatest", mock.Anything, mock.Anything, mock.Anything).Return(false, nil)
 
-		err := ticker.Tick(ctx)
-		assert.NoError(t, err)
+		ticker.RunTicker(cancelCtx)
 
-		mocks.storage.AssertCalled(t, "GetLatest", mock.Anything, now.Add(1 * time.Second), ticker)
+		time.Sleep(1*time.Second)
+		cancel()
+		time.Sleep(1*time.Second)
+
+		mocks.storage.AssertCalled(t, "GetLatest", mock.Anything, now.Add(2 * time.Second), ticker)
+
+		expectedLogs := []log{
+			{
+				msg:   fmt.Sprintf("handled 0 messages, scan time: %v", now.Add(2 * time.Second)),
+				level: logrus.InfoLevel,
+			},
+			{
+				msg:   "ticker is shut down",
+				level: logrus.InfoLevel,
+			},
+		}
+		assertLogs(t, expectedLogs, hook.AllEntries())
+		hook.Reset()
+
 	})
 
 	t.Run("storage contains eligible messages", func(t *testing.T) {
+		cancelCtx, cancel := context.WithCancel(ctx)
 		ticker, mocks := tickerWithMocks()
+		hook := test.NewGlobal()
 
 		counter := 0
 
@@ -46,22 +70,59 @@ func TestTickerReceive(t *testing.T) {
 			return true
 		}, nil)
 
-		err := ticker.Tick(ctx)
-		assert.NoError(t, err)
+		ticker.RunTicker(cancelCtx)
 
-		mocks.storage.AssertCalled(t, "GetLatest", mock.Anything, now.Add(1 * time.Second), ticker)
+		time.Sleep(1*time.Second)
+		cancel()
+		time.Sleep(1*time.Second)
+
+		mocks.storage.AssertCalled(t, "GetLatest", mock.Anything, now.Add(2 * time.Second), ticker)
 		mocks.storage.AssertNumberOfCalls(t, "GetLatest", 3)
+
+		expectedLogs := []log{
+			{
+				msg:   fmt.Sprintf("handled 2 messages, scan time: %v", now.Add(2 * time.Second)),
+				level: logrus.InfoLevel,
+			},
+			{
+				msg:   "ticker is shut down",
+				level: logrus.InfoLevel,
+			},
+		}
+		assertLogs(t, expectedLogs, hook.AllEntries())
+		hook.Reset()
 	})
 
 	t.Run("storage fails", func(t *testing.T) {
+		cancelCtx, cancel := context.WithCancel(ctx)
 		ticker, mocks := tickerWithMocks()
-
+		hook := test.NewGlobal()
 
 		mocks.timeSource.On("Now").Return(now)
-		mocks.storage.On("GetLatest", mock.Anything, mock.Anything, mock.Anything).Return(false, fmt.Errorf(""))
+		mocks.storage.On("GetLatest", mock.Anything, mock.Anything, mock.Anything).Return(false, fmt.Errorf("error"))
 
-		err := ticker.Tick(ctx)
-		assert.Error(t, err)
+		ticker.RunTicker(cancelCtx)
+
+		time.Sleep(1*time.Second)
+		cancel()
+		time.Sleep(1*time.Second)
+
+		expectedLogs := []log{
+			{
+				msg:   "failed to handle message",
+				level: logrus.ErrorLevel,
+			},
+			{
+				msg:   fmt.Sprintf("handled 0 messages, scan time: %v", now.Add(2 * time.Second)),
+				level: logrus.InfoLevel,
+			},
+			{
+				msg:   "ticker is shut down",
+				level: logrus.InfoLevel,
+			},
+		}
+		assertLogs(t, expectedLogs, hook.AllEntries())
+		hook.Reset()
 	})
 }
 
@@ -115,4 +176,17 @@ func tickerWithMocks() (*scheduler.Ticker, tickerMocks) {
 	})
 
 	return ticker, m
+}
+
+func assertLogs(t *testing.T, expectedLogs []log, actualLogs []*logrus.Entry) {
+	require.Equal(t, len(expectedLogs), len(actualLogs))
+	for i, log := range actualLogs {
+		assert.Equal(t, expectedLogs[i].msg, log.Message)
+		assert.Equal(t, expectedLogs[i].level, log.Level)
+	}
+}
+
+type log struct {
+	msg   string
+	level logrus.Level
 }

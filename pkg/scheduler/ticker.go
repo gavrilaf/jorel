@@ -10,7 +10,10 @@ import (
 	"github.com/gavrilaf/dyson/pkg/scheduler/storage"
 )
 
-const deviationTimeInSeconds = 2
+const (
+	tickPeriod = 1 * time.Second
+	deviationTime = 2 * time.Second
+)
 
 type TickerConfig struct {
 	Publisher  msgqueue.Publisher
@@ -33,12 +36,25 @@ func NewTicker(config TickerConfig) *Ticker {
 }
 
 // Activates ticker loop
-func (h *Ticker) Tick(ctx context.Context) error {
-	return h.handleTick(ctx)
+func (h *Ticker) RunTicker(ctx context.Context)  {
+	ticker := time.NewTicker(tickPeriod)
+
+	go func() {
+		for {
+			select {
+			case <-ctx.Done():
+				dlog.FromContext(ctx).Info("ticker is shut down")
+				return
+			case <-ticker.C:
+				h.handleTick(ctx)
+			}
+		}
+
+	}()
 }
 
-func (h *Ticker) handleTick(ctx context.Context) error {
-	scanTime := h.timeSource.Now().Add(deviationTimeInSeconds * time.Second)
+func (h *Ticker) handleTick(ctx context.Context) {
+	scanTime := h.timeSource.Now().Add(deviationTime)
 
 	counter := 0
 	continueHandling := true
@@ -56,7 +72,6 @@ func (h *Ticker) handleTick(ctx context.Context) error {
 	}
 
 	dlog.FromContext(ctx).Infof("handled %d messages, scan time: %v", counter, scanTime)
-	return err
 }
 
 func (h *Ticker) HandleMessage(ctx context.Context, msg storage.ScheduledMessage) error {
