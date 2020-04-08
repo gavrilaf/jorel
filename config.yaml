@@ -1,0 +1,19 @@
+---
+project-id:
+  - dyson
+
+ingress-subscription:
+  - jor-el-ingress-sub
+
+default:
+  topic-name: default
+  aggregation: no
+
+routing:
+  - message-type: type-one
+    topic: topic-one
+    aggregation: no
+
+  - message-type: type-two
+    topic: topic-two
+    aggregation: skip
