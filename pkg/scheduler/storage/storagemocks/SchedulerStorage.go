@@ -51,13 +51,13 @@ func (_m *SchedulerStorage) GetLatest(ctx context.Context, olderThan time.Time, 
 	return r0, r1
 }
 
-// Save provides a mock function with given fields: ctx, scheduledTime, msg
-func (_m *SchedulerStorage) Save(ctx context.Context, scheduledTime time.Time, msg storage.Message) error {
-	ret := _m.Called(ctx, scheduledTime, msg)
+// Save provides a mock function with given fields: ctx, scheduledTime, msgType, aggregationID, msg
+func (_m *SchedulerStorage) Save(ctx context.Context, scheduledTime time.Time, msgType string, aggregationID string, msg storage.Message) error {
+	ret := _m.Called(ctx, scheduledTime, msgType, aggregationID, msg)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, time.Time, storage.Message) error); ok {
-		r0 = rf(ctx, scheduledTime, msg)
+	if rf, ok := ret.Get(0).(func(context.Context, time.Time, string, string, storage.Message) error); ok {
+		r0 = rf(ctx, scheduledTime, msgType, aggregationID, msg)
 	} else {
 		r0 = ret.Error(0)
 	}

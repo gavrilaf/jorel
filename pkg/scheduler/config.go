@@ -26,7 +26,7 @@ type Config struct {
 	Routing             map[string]EgressTopicConfig
 }
 
-func ReadConfig(buffer []byte) (Config, error) {
+func ParseConfig(buffer []byte) (Config, error) {
 
 	type YamlRouteConfig struct {
 		MessageType string `yaml:"message-type"`

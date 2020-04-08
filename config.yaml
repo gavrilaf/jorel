@@ -1,19 +1,13 @@
 ---
-project-id:
-  - dyson
+project-id: dyson-272914
 
-ingress-subscription:
-  - jor-el-ingress-sub
+ingress-subscription: ingress-subs
 
 default:
-  topic-name: default
+  topic-name: default-topic
   aggregation: no
 
 routing:
-  - message-type: type-one
-    topic: topic-one
+  - message-type: cancel
+    topic-name: cancel-topic
     aggregation: no
-
-  - message-type: type-two
-    topic: topic-two
-    aggregation: skip

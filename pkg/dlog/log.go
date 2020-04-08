@@ -21,7 +21,6 @@ var (
 
 type logKey struct{}
 
-
 func FromContext(ctx context.Context) *logrus.Entry {
 	entry := ctx.Value(logKey{})
 	if entry == nil {
@@ -34,4 +33,3 @@ func FromContext(ctx context.Context) *logrus.Entry {
 func WithLogger(ctx context.Context, entry *logrus.Entry) context.Context {
 	return context.WithValue(ctx, logKey{}, entry)
 }
-

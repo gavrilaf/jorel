@@ -12,4 +12,3 @@ type SystemTime struct{}
 func (SystemTime) Now() time.Time {
 	return time.Now().UTC()
 }
-

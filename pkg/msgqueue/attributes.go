@@ -6,11 +6,21 @@ import (
 )
 
 const (
-	delayInSecondsKey = "jor-el-delay"
+	delayInSecondsKey = "delay"
+	msgTypeKey        = "message-type"
+	aggregationIDKey  = "aggregation-id"
 )
+
+var predefinedAttributes = map[string]struct{}{
+	delayInSecondsKey: {},
+	msgTypeKey:        {},
+	aggregationIDKey:  {},
+}
 
 type MsgAttributes struct {
 	DelayInSeconds int
+	MessageType    string
+	AggregationID  string
 	Original       map[string]string
 }
 
@@ -22,6 +32,14 @@ func (m MsgAttributes) GetAttributes() map[string]string {
 	}
 
 	attributes[delayInSecondsKey] = strconv.Itoa(m.DelayInSeconds)
+
+	if m.MessageType != "" {
+		attributes[msgTypeKey] = m.MessageType
+	}
+
+	if m.AggregationID != "" {
+		attributes[aggregationIDKey] = m.AggregationID
+	}
 
 	return attributes
 }
@@ -42,11 +60,14 @@ func NewMsgAttributes(attributes map[string]string) (MsgAttributes, error) {
 		return MsgAttributes{}, fmt.Errorf("couldn't find message delay")
 	}
 
+	msgType := attributes[msgTypeKey]
+	aggregationID := attributes[aggregationIDKey]
+
 	var other map[string]string
 	if len(attributes) > 1 {
 		other = make(map[string]string)
 		for k, v := range attributes {
-			if k != delayInSecondsKey {
+			if _, ok := predefinedAttributes[k]; !ok {
 				other[k] = v
 			}
 		}
@@ -54,6 +75,8 @@ func NewMsgAttributes(attributes map[string]string) (MsgAttributes, error) {
 
 	return MsgAttributes{
 		DelayInSeconds: delay,
+		MessageType:    msgType,
+		AggregationID:  aggregationID,
 		Original:       other,
 	}, nil
 }

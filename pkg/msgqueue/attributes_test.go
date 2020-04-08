@@ -20,13 +20,22 @@ func TestMsgAttributes(t *testing.T) {
 			},
 		},
 		{
-			name: "empty delay field",
+			name:     "empty delay field",
 			msgAttrs: msgqueue.MsgAttributes{},
 		},
 		{
 			name: "with other attributes",
 			msgAttrs: msgqueue.MsgAttributes{
 				DelayInSeconds: 86400,
+				Original:       map[string]string{"one": "two", "three": "four"},
+			},
+		},
+		{
+			name: "with all fields",
+			msgAttrs: msgqueue.MsgAttributes{
+				DelayInSeconds: 86400,
+				MessageType:    "cancel",
+				AggregationID:  "12",
 				Original:       map[string]string{"one": "two", "three": "four"},
 			},
 		},
@@ -42,23 +51,23 @@ func TestMsgAttributes(t *testing.T) {
 	}
 
 	invalidAttrs := []struct {
-		name     string
+		name  string
 		attrs map[string]string
 	}{
 		{
-			name: "empty attributes",
+			name:  "empty attributes",
 			attrs: map[string]string{},
 		},
 		{
-			name: "no delay field",
+			name:  "no delay field",
 			attrs: map[string]string{"one": "two"},
 		},
 		{
-			name: "negative delay",
+			name:  "negative delay",
 			attrs: map[string]string{"jor-el-delay": "-10"},
 		},
 		{
-			name: "invalid delay",
+			name:  "invalid delay",
 			attrs: map[string]string{"jor-el-delay": "i'm delay"},
 		},
 	}

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/rand"
+	"os"
 	"time"
 
 	"github.com/google/uuid"
@@ -15,11 +16,26 @@ import (
 	"github.com/gavrilaf/dyson/pkg/utils"
 )
 
+const (
+	projectID  = "dyson-272914"
+	topicID = "ingress-topic"
+)
+
+const (
+	simpleMode = iota
+	routingMode
+)
+
 func main() {
+	mode := simpleMode
+	if len(os.Args) > 1 {
+		mode = routingMode
+	}
+
 	ctx := context.Background()
 	logger := dlog.FromContext(ctx)
 
-	publisher, err := msgqueue.NewPublisher(ctx, testdata.ProjectID, testdata.IngressTopic)
+	publisher, err := msgqueue.NewPublisher(ctx, projectID, topicID)
 	if err != nil {
 		logger.Panicf("failed to create publisher, %v", err)
 	}
@@ -27,6 +43,8 @@ func main() {
 	defer publisher.Close()
 
 	publisherID := uuid.New().String()
+
+	msgTypes := []string{"", "cancel"}
 
 	delays := []int{
 		85,
@@ -44,7 +62,7 @@ func main() {
 	sentCount := 0
 	startTime := time.Now()
 
-	for repeat := 0; repeat < 100; repeat++ {
+	for repeat := 0; repeat < 300; repeat++ {
 		for indx, d := range delays {
 			id := fmt.Sprintf("%s-%d", publisherID, indx)
 			now := time.Now().UTC()
@@ -62,11 +80,20 @@ func main() {
 				logger.Panicf("failed to marshal message, %v", err)
 			}
 
-			attributes := msgqueue.MsgAttributes{
-				DelayInSeconds: d,
-				Original:       map[string]string{"one": "two"},
-			}
+			var attributes msgqueue.MsgAttributes
 
+			if mode == simpleMode {
+				attributes = msgqueue.MsgAttributes{
+					DelayInSeconds: d,
+					Original:       map[string]string{"one": "two"},
+				}
+			} else {
+				attributes = msgqueue.MsgAttributes{
+					DelayInSeconds: d,
+					MessageType: msgTypes[rand.Intn(2)],
+					Original:       map[string]string{"one": "two"},
+				}
+			}
 			_, err = publisher.Publish(ctx, data, attributes.GetAttributes())
 			if err != nil {
 				logger.Panicf("failed to publish message, %v", err)

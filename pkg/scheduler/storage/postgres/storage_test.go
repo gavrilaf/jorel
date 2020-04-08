@@ -39,10 +39,10 @@ func TestStorageBase(t *testing.T) {
 		Data: []byte("1234567"),
 	}
 
-	err = stg.Save(ctx, fiveSecs, msgWithAttributes)
+	err = stg.Save(ctx, fiveSecs, "cancel", "", msgWithAttributes)
 	assert.NoError(t, err)
 
-	err = stg.Save(ctx, tenSecs, msgWithEmptyAttributes)
+	err = stg.Save(ctx, tenSecs, "", "", msgWithEmptyAttributes)
 	assert.NoError(t, err)
 
 	handler := &storagemocks.Handler{}
@@ -56,6 +56,7 @@ func TestStorageBase(t *testing.T) {
 
 	expectedMessage := storage.ScheduledMessage{
 		Message:       msgWithAttributes,
+		MessageType:   "cancel",
 		ScheduledTime: fiveSecs,
 	}
 	handler.AssertCalled(t, "HandleMessage", mock.Anything, expectedMessage)
@@ -114,7 +115,7 @@ func TestStorageBigObject(t *testing.T) {
 		Attributes: map[string]string{"one": "two", "2": "3", "message-id": "12345"},
 	}
 
-	err = stg.Save(ctx, scheduledTime, message)
+	err = stg.Save(ctx, scheduledTime, "big-object", "", message)
 	assert.NoError(t, err)
 
 	handler := &storagemocks.Handler{}
@@ -128,6 +129,7 @@ func TestStorageBigObject(t *testing.T) {
 
 	expectedMessage := storage.ScheduledMessage{
 		Message:       message,
+		MessageType:   "big-object",
 		ScheduledTime: scheduledTime,
 	}
 	handler.AssertCalled(t, "HandleMessage", mock.Anything, expectedMessage)
@@ -162,7 +164,7 @@ func TestStorageConcurrency(t *testing.T) {
 	objectsCount := 20
 
 	for i := 0; i < objectsCount; i++ {
-		err = stg.Save(ctx, fiveSecs, msg)
+		err = stg.Save(ctx, fiveSecs, "update", "", msg)
 		assert.NoError(t, err)
 	}
 

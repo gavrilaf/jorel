@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"os"
 	"time"
 
 	"github.com/gavrilaf/dyson/pkg/dlog"
@@ -11,12 +12,19 @@ import (
 	"github.com/gavrilaf/dyson/pkg/utils"
 )
 
-var receivedCount = 0
-var outboundCount = 0
-var meanDeviation = time.Duration(0)
-var maxDeviation = time.Duration(0)
+const (
+	projectID      = "dyson-272914"
+	defaultSubscription = "default-topic-subs"
+)
 
-type handler struct {}
+var (
+	receivedCount = 0
+	outboundCount = 0
+	meanDeviation = time.Duration(0)
+	maxDeviation  = time.Duration(0)
+)
+
+type handler struct{}
 
 func (handler) Receive(ctx context.Context, data []byte, attributes map[string]string) error {
 	var msg testdata.Message
@@ -49,7 +57,12 @@ func main() {
 	ctx := context.Background()
 	logger := dlog.FromContext(ctx)
 
-	receiver, err := msgqueue.NewReceiver(ctx, testdata.ProjectID, testdata.EgressSubs)
+	var subscriptionID = defaultSubscription
+	if len(os.Args) > 1 {
+		subscriptionID = os.Args[1]
+	}
+
+	receiver, err := msgqueue.NewReceiver(ctx, projectID, subscriptionID)
 	if err != nil {
 		logger.Panicf("failed to create receiver, %v", err)
 	}

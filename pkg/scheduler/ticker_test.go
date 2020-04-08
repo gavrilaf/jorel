@@ -33,15 +33,15 @@ func TestTickerReceive(t *testing.T) {
 
 		ticker.RunTicker(cancelCtx)
 
-		time.Sleep(1*time.Second)
+		time.Sleep(1 * time.Second)
 		cancel()
-		time.Sleep(1*time.Second)
+		time.Sleep(1 * time.Second)
 
-		mocks.storage.AssertCalled(t, "GetLatest", mock.Anything, now.Add(2 * time.Second), ticker)
+		mocks.storage.AssertCalled(t, "GetLatest", mock.Anything, now.Add(2*time.Second), ticker)
 
 		expectedLogs := []log{
 			{
-				msg:   fmt.Sprintf("handled 0 messages, scan time: %v", now.Add(2 * time.Second)),
+				msg:   fmt.Sprintf("handled 0 messages, scan time: %v", now.Add(2*time.Second)),
 				level: logrus.InfoLevel,
 			},
 			{
@@ -72,16 +72,16 @@ func TestTickerReceive(t *testing.T) {
 
 		ticker.RunTicker(cancelCtx)
 
-		time.Sleep(1*time.Second)
+		time.Sleep(1 * time.Second)
 		cancel()
-		time.Sleep(1*time.Second)
+		time.Sleep(1 * time.Second)
 
-		mocks.storage.AssertCalled(t, "GetLatest", mock.Anything, now.Add(2 * time.Second), ticker)
+		mocks.storage.AssertCalled(t, "GetLatest", mock.Anything, now.Add(2*time.Second), ticker)
 		mocks.storage.AssertNumberOfCalls(t, "GetLatest", 3)
 
 		expectedLogs := []log{
 			{
-				msg:   fmt.Sprintf("handled 2 messages, scan time: %v", now.Add(2 * time.Second)),
+				msg:   fmt.Sprintf("handled 2 messages, scan time: %v", now.Add(2*time.Second)),
 				level: logrus.InfoLevel,
 			},
 			{
@@ -103,9 +103,9 @@ func TestTickerReceive(t *testing.T) {
 
 		ticker.RunTicker(cancelCtx)
 
-		time.Sleep(1*time.Second)
+		time.Sleep(1 * time.Second)
 		cancel()
-		time.Sleep(1*time.Second)
+		time.Sleep(1 * time.Second)
 
 		expectedLogs := []log{
 			{
@@ -113,7 +113,7 @@ func TestTickerReceive(t *testing.T) {
 				level: logrus.ErrorLevel,
 			},
 			{
-				msg:   fmt.Sprintf("handled 0 messages, scan time: %v", now.Add(2 * time.Second)),
+				msg:   fmt.Sprintf("handled 0 messages, scan time: %v", now.Add(2*time.Second)),
 				level: logrus.InfoLevel,
 			},
 			{
@@ -137,40 +137,41 @@ func TestTickerHandleMessage(t *testing.T) {
 	attributes := map[string]string{"one": "two"}
 
 	msg := storage.ScheduledMessage{
-		Message:       storage.Message{
-			Data: data,
+		Message: storage.Message{
+			Data:       data,
 			Attributes: attributes,
 		},
+		MessageType: "cancel",
 	}
 
 	t.Run("publish message", func(t *testing.T) {
 		ticker, mocks := tickerWithMocks()
 
 		mocks.timeSource.On("Now").Return(now)
-		mocks.publisher.On("Publish", mock.Anything, mock.Anything, mock.Anything).Return(publishResult, nil)
+		mocks.router.On("Publish", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(publishResult, nil)
 
 		err := ticker.HandleMessage(ctx, msg)
 		assert.NoError(t, err)
 
-		mocks.publisher.AssertCalled(t, "Publish", mock.Anything, data, attributes)
+		mocks.router.AssertCalled(t, "Publish", mock.Anything, "cancel", data, attributes)
 	})
 }
 
 type tickerMocks struct {
-	publisher  *msgqueuemocks.Publisher
+	router     *schedulermocks.Router
 	storage    *storagemocks.SchedulerStorage
 	timeSource *schedulermocks.TimeSource
 }
 
 func tickerWithMocks() (*scheduler.Ticker, tickerMocks) {
 	m := tickerMocks{
-		publisher:  &msgqueuemocks.Publisher{},
+		router:     &schedulermocks.Router{},
 		storage:    &storagemocks.SchedulerStorage{},
 		timeSource: &schedulermocks.TimeSource{},
 	}
 
 	ticker := scheduler.NewTicker(scheduler.TickerConfig{
-		Publisher:  m.publisher,
+		Router:     m.router,
 		Storage:    m.storage,
 		TimeSource: m.timeSource,
 	})

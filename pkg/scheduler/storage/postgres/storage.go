@@ -39,14 +39,14 @@ func NewStorage(ctx context.Context, databaseUrl string) (base.SchedulerStorage,
 	}, nil
 }
 
-func (s *storage) Save(ctx context.Context, scheduledTime time.Time, msg base.Message) error {
+func (s *storage) Save(ctx context.Context, scheduledTime time.Time, msgType string, aggregationID string, msg base.Message) error {
 	attributes, err := json.Marshal(msg.Attributes)
 	if err != nil {
 		return fmt.Errorf("unable to marshal attributes, %w", msg.Attributes)
 	}
 
-	_, err = s.db.Exec(ctx, "insert into messages(scheduledtime, done, data, attributes) values($1, $2, $3, $4)",
-		scheduledTime, false, msg.Data, attributes)
+	_, err = s.db.Exec(ctx, "insert into messages(scheduled_time, msg_type, aggregation_id, data, attributes) values($1, $2, $3, $4, $5)",
+		scheduledTime, msgType, aggregationID, msg.Data, attributes)
 	return err
 }
 
@@ -56,13 +56,10 @@ func (s *storage) GetLatest(ctx context.Context, olderThan time.Time, handler ba
 		return false, fmt.Errorf("failed to start transaction, %w", err)
 	}
 
-	//sql := "UPDATE messages SET done = 't' WHERE id = (SELECT id " +
-	//	"FROM messages WHERE done = 'f' AND scheduledtime <= $1 " +
-	//	"ORDER BY scheduledtime FOR UPDATE SKIP LOCKED LIMIT 1) RETURNING scheduledtime, data, attributes;"
-
 	sql := "DELETE FROM messages WHERE id = (SELECT id " +
-		"FROM messages WHERE scheduledtime <= $1 " +
-		"ORDER BY scheduledtime FOR UPDATE SKIP LOCKED LIMIT 1) RETURNING scheduledtime, data, attributes;"
+		"FROM messages WHERE scheduled_time <= $1 " +
+		"ORDER BY scheduled_time FOR UPDATE SKIP LOCKED LIMIT 1) " +
+		"RETURNING scheduled_time, msg_type, data, attributes;"
 
 	rows, err := tx.Query(ctx, sql, olderThan)
 	if err != nil {
@@ -73,10 +70,11 @@ func (s *storage) GetLatest(ctx context.Context, olderThan time.Time, handler ba
 	handled := false
 	if rows.Next() {
 		var scheduledTime time.Time
+		var msgType string
 		var data []byte
 		var attrs []byte
 
-		err = rows.Scan(&scheduledTime, &data, &attrs)
+		err = rows.Scan(&scheduledTime, &msgType, &data, &attrs)
 		if err != nil {
 			tx.Rollback(ctx)
 			return false, fmt.Errorf("failed to query scheduled items, %w", err)
@@ -94,7 +92,8 @@ func (s *storage) GetLatest(ctx context.Context, olderThan time.Time, handler ba
 				Data:       data,
 				Attributes: parsedAttrs,
 			},
-			ScheduledTime: scheduledTime.UTC(),
+			MessageType:   msgType,
+			ScheduledTime: scheduledTime,
 		}
 
 		err := handler.HandleMessage(ctx, msg)

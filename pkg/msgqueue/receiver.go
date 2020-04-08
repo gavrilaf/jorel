@@ -39,7 +39,7 @@ type receiverImpl struct {
 	sub    *pubsub.Subscription
 }
 
-func (p* receiverImpl) Run(ctx context.Context, handler Handler) error {
+func (p *receiverImpl) Run(ctx context.Context, handler Handler) error {
 	go func() {
 		err := p.sub.Receive(ctx, func(ctx context.Context, msg *pubsub.Message) {
 			defer msg.Ack()

@@ -25,21 +25,21 @@ routing:
     topic-name: topic-two
     aggregation: skip
 `
-	cfg, err := scheduler.ReadConfig([]byte(str))
+	cfg, err := scheduler.ParseConfig([]byte(str))
 	assert.NoError(t, err)
 
 	expected := scheduler.Config{
 		ProjectID:           "test",
 		IngressSubscription: "ingress-sub",
-		DefaultEgress:       scheduler.EgressTopicConfig{
+		DefaultEgress: scheduler.EgressTopicConfig{
 			Name: "default-egress",
 		},
 		Routing: map[string]scheduler.EgressTopicConfig{
 			"type-one": {
-				Name:        "topic-one",
+				Name: "topic-one",
 			},
 			"type-two": {
-				Name:        "topic-two",
+				Name: "topic-two",
 			},
 		},
 	}

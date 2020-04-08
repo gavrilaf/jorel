@@ -7,12 +7,13 @@ import (
 )
 
 type Message struct {
-	Data []byte
+	Data       []byte
 	Attributes map[string]string
 }
 
 type ScheduledMessage struct {
 	Message
+	MessageType   string
 	ScheduledTime time.Time
 }
 
@@ -24,6 +25,6 @@ type Handler interface {
 //go:generate mockery -name SchedulerStorage -outpkg storagemocks -output ./storagemocks -dir .
 type SchedulerStorage interface {
 	io.Closer
-	Save(ctx context.Context, scheduledTime time.Time, msg Message) error
+	Save(ctx context.Context, scheduledTime time.Time, msgType string, aggregationID string, msg Message) error
 	GetLatest(ctx context.Context, olderThan time.Time, handler Handler) (bool, error)
 }
