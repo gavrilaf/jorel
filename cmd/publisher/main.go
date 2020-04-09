@@ -62,7 +62,7 @@ func main() {
 	sentCount := 0
 	startTime := time.Now()
 
-	for repeat := 0; repeat < 300; repeat++ {
+	for repeat := 0; repeat < 100; repeat++ {
 		for indx, d := range delays {
 			id := fmt.Sprintf("%s-%d", publisherID, indx)
 			now := time.Now().UTC()
