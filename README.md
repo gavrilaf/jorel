@@ -1,6 +1,6 @@
 # Jor-El - Master of Scheduling on the Intergalactic Stock Exchange
 
-![](jor-el.jpg=250x250)
+![](/jor-el.jpg =250x)
 
 Jor-El is the service extends Google Pub/Sub with some new features:
 
@@ -13,6 +13,8 @@ ONLY the last message (or first)  (not implemented yet).
 
 - Aggregation - messages with the same *aggregation-id* can be *joined*. It means, will be republished 
 one *aggregated* message contains an array of original messages (not implemented yet).
+
+![](/common-schema.png)
 
 ## How to run the test project
 
@@ -50,7 +52,7 @@ one *aggregated* message contains an array of original messages (not implemented
 
 **config.yaml**
 
-`
+```
 ---
 project-id: jorel-test-project
 ingress-subscription: ingress-subs
@@ -63,7 +65,7 @@ routing:
   - message-type: cancel
     topic-name: cancel-topic
     aggregation: no
-`
+```
 
 The first two lines are pretty obvious: GCP project name and jor-el ingress subscription ID. 
 
@@ -74,9 +76,7 @@ without message type or with unknown message type according to this section rule
 
 ## Ingress message format
 
-The ‘Meta Message’ (or jor-el ingress message) wraps the ‘Target Message’ as jor-el only needs 
-the bytes that will be sent and the name of the queue, the ‘Target Queue’. 
-This way jor-el doesn’t need to know anything about the content of that ‘Target Message’.  
+The ‘Meta Message’ (or jor-el ingress message) wraps the ‘Target Message’ as jor-el only needs the bytes that will be sent and the name of the queue, the ‘Target Queue’. This way jor-el doesn’t need to know anything about the content of that ‘Target Message’.  
 
 Meta information is passing through message attributes:
 
