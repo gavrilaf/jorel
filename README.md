@@ -1,6 +1,6 @@
 # Jor-El - Master of Scheduling on the Intergalactic Stock Exchange
 
-![](jor-el.jpg =250x)
+![](/jor-el.jpg =250x)
 
 Jor-El is the service extends Google Pub/Sub with some new features:
 
@@ -14,7 +14,7 @@ ONLY the last message (or first)  (not implemented yet).
 - Aggregation - messages with the same *aggregation-id* can be *joined*. It means, will be republished 
 one *aggregated* message contains an array of original messages (not implemented yet).
 
-![](commom-schema.png)
+![](/common-schema.png)
 
 ## How to run the test project
 
