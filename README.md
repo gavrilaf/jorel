@@ -14,6 +14,8 @@ ONLY the last message (or first)  (not implemented yet).
 - Aggregation - messages with the same *aggregation-id* can be *joined*. It means, will be republished 
 one *aggregated* message contains an array of original messages (not implemented yet).
 
+![](/common-schema.png)
+
 ## How to run the test project
 
 1) create GCP project (or use existing) and download the service account key.
@@ -82,7 +84,10 @@ Meta information is passing through message attributes:
 * **message-type** - using for the routing (if needed). Optional.
 * **aggregation-id** - using for the debounce and aggregation. Optional. Not implemented yet.
 
-![](/common-schema.png)
+## Run in GKE
+
+in progress
+
 
 
 
