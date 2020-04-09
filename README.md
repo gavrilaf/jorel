@@ -1,6 +1,6 @@
 # Jor-El - Master of Scheduling on the Intergalactic Stock Exchange
 
-<img src="(/jor-el.jpg" width="250" height="250"/>
+![](\small-jor-el.png)
 
 Jor-El is the service extends Google Pub/Sub with some new features:
 
@@ -13,8 +13,6 @@ ONLY the last message (or first)  (not implemented yet).
 
 - Aggregation - messages with the same *aggregation-id* can be *joined*. It means, will be republished 
 one *aggregated* message contains an array of original messages (not implemented yet).
-
-![](/common-schema.png)
 
 ## How to run the test project
 
@@ -83,6 +81,8 @@ Meta information is passing through message attributes:
 * **delay** - message delay in seconds. Mandatory attribute. It can be 0, it means - republish immediately.
 * **message-type** - using for the routing (if needed). Optional.
 * **aggregation-id** - using for the debounce and aggregation. Optional. Not implemented yet.
+
+![](/common-schema.png)
 
 
 
