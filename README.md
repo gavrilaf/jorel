@@ -1,6 +1,6 @@
 # Jor-El - Master of Scheduling on the Intergalactic Stock Exchange
 
-![](\small-jor-el.jpg)
+![](/small-jor-el.jpg)
 
 Jor-El is the service extends Google Pub/Sub with some new features:
 
