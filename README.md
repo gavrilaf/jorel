@@ -1,5 +1,7 @@
 # Jor-El - Master of Scheduling on the Intergalactic Stock Exchange
 
+![](jor-el.jpg=250x250)
+
 Jor-El is the service extends Google Pub/Sub with some new features:
 
 - Routing - the message can be republished in the different topics based on their meta information.
