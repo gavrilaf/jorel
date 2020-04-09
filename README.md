@@ -14,7 +14,7 @@ ONLY the last message (or first)  (not implemented yet).
 - Aggregation - messages with the same *aggregation-id* can be *joined*. It means, will be republished 
 one *aggregated* message contains an array of original messages (not implemented yet).
 
-![](/common-schema.png)
+![](/common-schema.pdf)
 
 ## How to run the test project
 
