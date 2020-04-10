@@ -7,7 +7,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/gavrilaf/dyson/pkg/dlog"
+	"github.com/gavrilaf/jorel/pkg/dlog"
 )
 
 func WaitForShutdown(ctx context.Context, cleanFn func()) {

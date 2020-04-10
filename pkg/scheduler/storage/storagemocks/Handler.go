@@ -5,7 +5,7 @@ package storagemocks
 import (
 	context "context"
 
-	storage "github.com/gavrilaf/dyson/pkg/scheduler/storage"
+	storage "github.com/gavrilaf/jorel/pkg/scheduler/storage"
 	mock "github.com/stretchr/testify/mock"
 )
 

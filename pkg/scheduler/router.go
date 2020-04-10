@@ -2,10 +2,10 @@ package scheduler
 
 import (
 	"context"
-	"github.com/gavrilaf/dyson/pkg/dlog"
 	"io"
 
-	"github.com/gavrilaf/dyson/pkg/msgqueue"
+	"github.com/gavrilaf/jorel/pkg/dlog"
+	"github.com/gavrilaf/jorel/pkg/msgqueue"
 )
 
 //go:generate mockery -name Router -outpkg schedulermocks -output ./schedulermocks -dir .

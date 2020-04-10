@@ -5,7 +5,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/gavrilaf/dyson/pkg/msgqueue"
+	"github.com/gavrilaf/jorel/pkg/msgqueue"
 )
 
 func TestMsgAttributes(t *testing.T) {

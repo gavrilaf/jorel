@@ -1,9 +1,11 @@
 package scheduler_test
 
 import (
-	"github.com/gavrilaf/dyson/pkg/scheduler"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+
+	"github.com/gavrilaf/jorel/pkg/scheduler"
 )
 
 func TestReadConfig(t *testing.T) {

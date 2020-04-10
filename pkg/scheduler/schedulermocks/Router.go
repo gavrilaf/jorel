@@ -5,7 +5,7 @@ package schedulermocks
 import (
 	context "context"
 
-	msgqueue "github.com/gavrilaf/dyson/pkg/msgqueue"
+	msgqueue "github.com/gavrilaf/jorel/pkg/msgqueue"
 	mock "github.com/stretchr/testify/mock"
 )
 

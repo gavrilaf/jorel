@@ -6,14 +6,14 @@ import (
 	"os"
 	"time"
 
-	"github.com/gavrilaf/dyson/pkg/dlog"
-	"github.com/gavrilaf/dyson/pkg/msgqueue"
-	"github.com/gavrilaf/dyson/pkg/testdata"
-	"github.com/gavrilaf/dyson/pkg/utils"
+	"github.com/gavrilaf/jorel/pkg/dlog"
+	"github.com/gavrilaf/jorel/pkg/msgqueue"
+	"github.com/gavrilaf/jorel/pkg/testdata"
+	"github.com/gavrilaf/jorel/pkg/utils"
 )
 
 const (
-	projectID      = "dyson-272914"
+	projectID           = "dyson-272914"
 	defaultSubscription = "default-topic-subs"
 )
 

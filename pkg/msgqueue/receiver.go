@@ -6,7 +6,7 @@ import (
 
 	"cloud.google.com/go/pubsub"
 
-	"github.com/gavrilaf/dyson/pkg/dlog"
+	"github.com/gavrilaf/jorel/pkg/dlog"
 )
 
 type Handler interface {

@@ -10,15 +10,15 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/gavrilaf/dyson/pkg/dlog"
-	"github.com/gavrilaf/dyson/pkg/msgqueue"
-	"github.com/gavrilaf/dyson/pkg/testdata"
-	"github.com/gavrilaf/dyson/pkg/utils"
+	"github.com/gavrilaf/jorel/pkg/dlog"
+	"github.com/gavrilaf/jorel/pkg/msgqueue"
+	"github.com/gavrilaf/jorel/pkg/testdata"
+	"github.com/gavrilaf/jorel/pkg/utils"
 )
 
 const (
-	projectID  = "dyson-272914"
-	topicID = "ingress-topic"
+	projectID = "dyson-272914"
+	topicID   = "ingress-topic"
 )
 
 const (
@@ -90,7 +90,7 @@ func main() {
 			} else {
 				attributes = msgqueue.MsgAttributes{
 					DelayInSeconds: d,
-					MessageType: msgTypes[rand.Intn(2)],
+					MessageType:    msgTypes[rand.Intn(2)],
 					Original:       map[string]string{"one": "two"},
 				}
 			}

@@ -5,11 +5,11 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/gavrilaf/dyson/pkg/dlog"
-	"github.com/gavrilaf/dyson/pkg/msgqueue"
-	"github.com/gavrilaf/dyson/pkg/scheduler"
-	"github.com/gavrilaf/dyson/pkg/scheduler/storage/postgres"
-	"github.com/gavrilaf/dyson/pkg/utils"
+	"github.com/gavrilaf/jorel/pkg/dlog"
+	"github.com/gavrilaf/jorel/pkg/msgqueue"
+	"github.com/gavrilaf/jorel/pkg/scheduler"
+	"github.com/gavrilaf/jorel/pkg/scheduler/storage/postgres"
+	"github.com/gavrilaf/jorel/pkg/utils"
 )
 
 func main() {
@@ -48,7 +48,7 @@ func main() {
 	}
 
 	ingressConfig := scheduler.IngressConfig{
-		Router:  router,
+		Router:     router,
 		Storage:    storage,
 		TimeSource: scheduler.SystemTime{},
 	}
@@ -64,7 +64,7 @@ func main() {
 	logger.Info("Starting ticker")
 
 	tickerConfig := scheduler.TickerConfig{
-		Router:  router,
+		Router:     router,
 		Storage:    storage,
 		TimeSource: scheduler.SystemTime{},
 	}

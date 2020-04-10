@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/gavrilaf/dyson/pkg/dlog"
-	"github.com/gavrilaf/dyson/pkg/scheduler/storage"
+	"github.com/gavrilaf/jorel/pkg/dlog"
+	"github.com/gavrilaf/jorel/pkg/scheduler/storage"
 )
 
 const (

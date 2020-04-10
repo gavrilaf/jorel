@@ -10,8 +10,8 @@ import (
 	"github.com/jackc/pgx/v4/log/logrusadapter"
 	"github.com/jackc/pgx/v4/pgxpool"
 
-	"github.com/gavrilaf/dyson/pkg/dlog"
-	base "github.com/gavrilaf/dyson/pkg/scheduler/storage"
+	"github.com/gavrilaf/jorel/pkg/dlog"
+	base "github.com/gavrilaf/jorel/pkg/scheduler/storage"
 )
 
 type storage struct {
