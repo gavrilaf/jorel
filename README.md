@@ -142,10 +142,10 @@ MacBook Pro 2,3 GHz 8-Core Intel Core i9 32 GB 2400 MHz DDR4
 Publisher sent in 5000 messages in 8m 21s.
 
 Receiver 1:
-    * received messages 2530, max deviation 3.13s, mean deviation 1.53s
+* received messages 2530, max deviation 3.13s, mean deviation 1.53s
 
 Receiver 2:
-    * received messages 2470, max deviation 5.27s, mean deviation 1.53s
+* received messages 2470, max deviation 5.27s, mean deviation 1.53s
 
 All messages were delivered, the scheduling accuracy is acceptable. 
 To be honest it's more Pub/Sub accuracy.
