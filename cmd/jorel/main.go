@@ -27,7 +27,7 @@ func main() {
 	}
 
 	// db
-	dbUrl := os.Getenv("JOR_EL_POSTGRE_URL")
+	dbUrl := os.Getenv("JOR_EL_POSTGRES_URL")
 	storage, err := postgres.NewStorage(ctx, dbUrl)
 	if err != nil {
 		logger.Panicf("failed to connect database, %v", err)

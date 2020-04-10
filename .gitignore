@@ -25,3 +25,6 @@ cloud_sql_proxy
 service-key.json
 
 url.txt
+
+deployment.yaml
+run_deployment.sh

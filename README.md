@@ -35,7 +35,7 @@ one *aggregated* message contains an array of original messages (not implemented
 
 * GOOGLE_APPLICATION_CREDENTIALS = path_to_the_account_key
 
-* JOR_EL_POSTGRE_URL - production database connection string 
+* JOR_EL_POSTGRES_URL - production database connection string 
 (something like *postgresql://user:password@host:port/database*)
 
 * JOR_EL_POSTGRES_TEST_URL - test database connection string

@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jorel-deployment
+  labels:
+    app: jorel
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jorel
+  template:
+    metadata:
+      labels:
+        app: jorel
+    spec:
+      containers:
+        # [START service]
+        - name: jorel
+          image: gcr.io/{{PROJECT_ID}}/jorel:{{VERSION_TAG}}
+          env:
+            - name: VERSION_TAG
+              value: "{{VERSION_TAG}}"
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: "/secrets/service-key.json"
+            - name: JOR_EL_POSTGRES_URL
+              valueFrom:
+                secretKeyRef:
+                  name: db-credentials
+                  key: connection
+          volumeMounts:
+            - name: account-credentials
+              mountPath: /secrets
+              readOnly: true
+        # [END service]
+
+        # [START sql-proxy]
+        - name: cloudsql-proxy
+          image: gcr.io/cloudsql-docker/gce-proxy:1.11
+          command: ["/cloud_sql_proxy", "-instances={{DB_CONNECTION}}=tcp:5432", "-credential_file=/secrets/service-key.json"]
+          volumeMounts:
+            - name: account-credentials
+              mountPath: /secrets
+              readOnly: true
+        # [END sql-proxy]
+
+      # [START volumes]
+      volumes:
+        - name: account-credentials
+          secret:
+            secretName: account-credentials
+      # [END volumes]
+---
