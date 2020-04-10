@@ -86,8 +86,66 @@ Meta information is passing through message attributes:
 
 ## Run in GKE
 
-in progress
+1) Create GKE cluster
+2) Install secrets:
+```
+    kubectl create secret generic account-credentials --from-file=service-key.json=service-key.json
+    kubectl create secret generic db-credentials --from-literal=connection=<DB_CONNECTION_STRING>
+```
 
+Build Docker image & generate deployment:
+```
+    ./scripts/generate_deploy.py
+```
 
+Deploy Jor-El on Kubernetes (deployment is being generated on the previous step):
+```
+    ./run_deployment.sh
+```
 
+Check deployment, view logs, scale if needed:
+```
+    kubectl get pods
+    kubectl logs -f jorel-deployment-6f8dd87f4f-msp5q jorel // you have to specify container because two containers deployed in one pod
+    kubectl scale deployment.v1.apps/jorel-deployment --replicas=3
+```
 
+## Test results
+
+Scale cluster into 5 pods:
+```
+    kubectl scale deployment.v1.apps/jorel-deployment --replicas=5
+```
+
+Run two receivers locally in different terminals:
+```
+    make run-receiver // receiver for the default topic
+    make run-receiver2 // receiver for the cancel topic
+```
+
+Open /cmd/publisher/main.go and update tests loop count:
+```
+    for repeat := 0; repeat < 500; repeat++ { // 100 -> 500
+		for indx, d := range delays {
+```
+
+Run publisher and wait about 20 minutes:
+```
+    make run-publisher2 // publish messages with two different types
+```
+
+### Test results
+
+Publisher & receivers are being run locally, so local configuration is important:
+MacBook Pro 2,3 GHz 8-Core Intel Core i9 32 GB 2400 MHz DDR4
+
+Publisher sent in 5000 messages in 8m 21s.
+
+Receiver 1:
+    * received messages 2530, max deviation 3.13s, mean deviation 1.53s
+
+Receiver 2:
+    * received messages 2470, max deviation 5.27s, mean deviation 1.53s
+
+All messages were delivered, the scheduling accuracy is acceptable. 
+To be honest it's more Pub/Sub accuracy.
