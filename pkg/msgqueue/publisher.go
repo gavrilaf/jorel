@@ -7,6 +7,34 @@ import (
 	"cloud.google.com/go/pubsub"
 )
 
+// PublisherFactory
+
+//go:generate mockery -name PublisherFactory -outpkg msgqueuemocks -output ./msgqueuemocks -dir .
+type PublisherFactory interface {
+	NewPublisher(ctx context.Context, projectID string, topicID string) (Publisher, error)
+}
+
+func NewPublisherFactory() PublisherFactory {
+	return &publisherFactory{}
+}
+
+type publisherFactory struct {}
+
+func (publisherFactory) NewPublisher(ctx context.Context, projectID string, topicID string) (Publisher, error) {
+	client, err := pubsub.NewClient(ctx, projectID)
+	if err != nil {
+		return nil, err
+	}
+
+	topic := client.Topic(topicID)
+
+	return &publisher{
+		client:  client,
+		topic:   topic,
+		topicID: topicID,
+	}, nil
+}
+
 // PublishResult
 
 //go:generate mockery -name PublishResult -outpkg msgqueuemocks -output ./msgqueuemocks -dir .
@@ -31,41 +59,24 @@ type Publisher interface {
 	Publish(ctx context.Context, data []byte, attributes map[string]string) (PublishResult, error)
 }
 
-func NewPublisher(ctx context.Context, projectID string, topicID string) (Publisher, error) {
-	client, err := pubsub.NewClient(ctx, projectID)
-	if err != nil {
-		return nil, err
-	}
-
-	topic := client.Topic(topicID)
-
-	return &publisherImpl{
-		client:  client,
-		topic:   topic,
-		topicID: topicID,
-	}, nil
-}
-
-// publisherImpl
-
-type publisherImpl struct {
+type publisher struct {
 	client  *pubsub.Client
 	topic   *pubsub.Topic
 	topicID string
 }
 
-func (p *publisherImpl) Close() error {
+func (p *publisher) Close() error {
 	if p.client != nil {
 		return p.client.Close()
 	}
 	return nil
 }
 
-func (p *publisherImpl) TopicID() string {
+func (p *publisher) TopicID() string {
 	return p.topicID
 }
 
-func (p *publisherImpl) Publish(ctx context.Context, data []byte, attributes map[string]string) (PublishResult, error) {
+func (p *publisher) Publish(ctx context.Context, data []byte, attributes map[string]string) (PublishResult, error) {
 	msg := &pubsub.Message{Data: data, Attributes: attributes}
 	return &publishResult{result: p.topic.Publish(ctx, msg)}, nil
 }

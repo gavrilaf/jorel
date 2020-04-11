@@ -16,7 +16,7 @@ import (
 	"github.com/gavrilaf/jorel/pkg/scheduler/storage/storagemocks"
 )
 
-func TestHandlerReceive(t *testing.T) {
+func TestIngressReceive(t *testing.T) {
 	ctx := context.Background()
 	data := []byte("data")
 

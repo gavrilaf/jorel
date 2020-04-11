@@ -8,7 +8,7 @@ import (
 	"github.com/gavrilaf/jorel/pkg/scheduler"
 )
 
-func TestReadConfig(t *testing.T) {
+func TestConfigRead(t *testing.T) {
 	str := `
 ---
 project-id: test

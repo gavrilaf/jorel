@@ -19,15 +19,15 @@ type routerImpl struct {
 	routes        map[string]msgqueue.Publisher
 }
 
-func NewRouter(ctx context.Context, config Config) (Router, error) {
-	defaultEgress, err := msgqueue.NewPublisher(ctx, config.ProjectID, config.DefaultEgress.Name)
+func NewRouter(ctx context.Context, config Config, publisherFactory msgqueue.PublisherFactory) (Router, error) {
+	defaultEgress, err := publisherFactory.NewPublisher(ctx, config.ProjectID, config.DefaultEgress.Name)
 	if err != nil {
 		return &routerImpl{}, err
 	}
 
 	routes := make(map[string]msgqueue.Publisher)
 	for m, r := range config.Routing {
-		p, err := msgqueue.NewPublisher(ctx, config.ProjectID, r.Name)
+		p, err := publisherFactory.NewPublisher(ctx, config.ProjectID, r.Name)
 		if err != nil {
 			return &routerImpl{}, err
 		}

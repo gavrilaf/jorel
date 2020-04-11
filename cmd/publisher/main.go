@@ -49,12 +49,12 @@ func main() {
 	delays := []int{
 		85,
 		800,
-		45,
+		145,
 		60,
 		45,
 		200,
 		150,
-		45,
+		245,
 		30,
 		600,
 	}
@@ -62,7 +62,7 @@ func main() {
 	sentCount := 0
 	startTime := time.Now()
 
-	for repeat := 0; repeat < 100; repeat++ {
+	for repeat := 0; repeat < 1000; repeat++ {
 		for indx, d := range delays {
 			id := fmt.Sprintf("%s-%d", publisherID, indx)
 			now := time.Now().UTC()
@@ -105,7 +105,7 @@ func main() {
 			sentCount += 1
 		}
 
-		time.Sleep(1 * time.Second)
+		//time.Sleep(1 * time.Second)
 	}
 
 	endTime := time.Now()

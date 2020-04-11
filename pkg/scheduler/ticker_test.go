@@ -19,7 +19,7 @@ import (
 	"github.com/gavrilaf/jorel/pkg/scheduler/storage/storagemocks"
 )
 
-func TestTickerReceive(t *testing.T) {
+func TestTickerRun(t *testing.T) {
 	ctx := context.Background()
 	now := time.Now()
 
