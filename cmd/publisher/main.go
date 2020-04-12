@@ -107,7 +107,7 @@ func main() {
 			sentCount += 1
 		}
 
-		//time.Sleep(1 * time.Second)
+		time.Sleep(500 * time.Millisecond)
 	}
 
 	endTime := time.Now()
