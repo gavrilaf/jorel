@@ -33,8 +33,10 @@ func main() {
 		logger.Panicf("failed to connect database, %v", err)
 	}
 
+	publisherFactory := msgqueue.NewPublisherFactory()
+
 	// router
-	router, err := scheduler.NewRouter(ctx, config)
+	router, err := scheduler.NewRouter(ctx, config, publisherFactory)
 	if err != nil {
 		logger.Panicf("failed to create router, %v", err)
 	}

@@ -35,7 +35,9 @@ func main() {
 	ctx := context.Background()
 	logger := dlog.FromContext(ctx)
 
-	publisher, err := msgqueue.NewPublisher(ctx, projectID, topicID)
+	factory := msgqueue.NewPublisherFactory()
+
+	publisher, err := factory.NewPublisher(ctx, projectID, topicID)
 	if err != nil {
 		logger.Panicf("failed to create publisher, %v", err)
 	}
@@ -47,16 +49,16 @@ func main() {
 	msgTypes := []string{"", "cancel"}
 
 	delays := []int{
-		85,
-		800,
-		145,
 		60,
-		45,
-		200,
+		90,
+		120,
 		150,
-		245,
-		30,
+		180,
+		210,
 		600,
+		800,
+		400,
+		300,
 	}
 
 	sentCount := 0
