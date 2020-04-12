@@ -5,7 +5,6 @@ metadata:
   labels:
     app: jorel
 spec:
-  replicas: 1
   selector:
     matchLabels:
       app: jorel
