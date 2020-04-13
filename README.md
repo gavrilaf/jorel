@@ -25,7 +25,7 @@ one *aggregated* message contains an array of original messages (not implemented
 * **default-topic** topic with **default-topic-subs** subscription;
 * **cancel-topic** topic with **cancel-topic-subs** subscription;
 
-3) activate Cloud SQL wth PostgresSQL 11 (documentation https://cloud.google.com/sql/docs/postgres/quickstart)
+3) activate Cloud SQL with PostgresSQL 11 (documentation https://cloud.google.com/sql/docs/postgres/quickstart)
 
 4) create two databases: one for the production service, one for the tests
 
@@ -139,13 +139,12 @@ Run publisher and wait about 20 minutes:
 Publisher & receivers are being run locally, so local configuration is important:
 MacBook Pro 2,3 GHz 8-Core Intel Core i9 32 GB 2400 MHz DDR4
 
-Publisher sent in 5000 messages in 8m 21s.
+Publisher sent in 10000 messages in 8m 23s.
 
 Receiver 1:
-* received messages 2530, max deviation 3.13s, mean deviation 1.53s
+* received 4986 messages, max deviation 2.5s, mean deviation 1.5s
 
 Receiver 2:
-* received messages 2470, max deviation 5.27s, mean deviation 1.53s
+* received 5014 messages, max deviation 3.3s, mean deviation 1.5s
 
 All messages were delivered, the scheduling accuracy is acceptable. 
-To be honest it's more Pub/Sub accuracy.
